@@ -1,4 +1,10 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
+import {
+    createFileRoute,
+    Link,
+    Outlet,
+    redirect,
+} from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_app")({
     beforeLoad: ({ context }) => {
@@ -12,5 +18,30 @@ export const Route = createFileRoute("/_app")({
 });
 
 function RouteComponent() {
-    return <div>Hello "/_app/_app"! You are authed</div>;
+    return (
+        <div>
+            <Header />
+            <div className='flex flex-1 mx-6 md:mx-40 justify-center'>
+                <Outlet />
+            </div>
+        </div>
+    );
 }
+
+function Header() {
+    return (
+        <div className='flex justify-between items-center p-4 mx-4'>
+            <div className='text-3xl font-bold'>Guardlight</div>
+            <div className='space-x-4'>
+                <Link to='/theme'>
+                    <Button variant='outline' onClick={() => Route.useNavigate}>
+                        Theme Configuration
+                    </Button>
+                </Link>
+                {/* <Button variant='outline'>Settings</Button> */}
+            </div>
+        </div>
+    );
+}
+
+export default Header;

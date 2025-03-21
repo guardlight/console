@@ -14,6 +14,9 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as LoginImport } from './routes/login'
 import { Route as AppImport } from './routes/_app'
 import { Route as AppIndexImport } from './routes/_app/index'
+import { Route as AppThemeImport } from './routes/_app/theme'
+import { Route as AppRequestImport } from './routes/_app/request'
+import { Route as AppAnalysisAnalysisIdImport } from './routes/_app/analysis/$analysisId'
 
 // Create/Update Routes
 
@@ -31,6 +34,24 @@ const AppRoute = AppImport.update({
 const AppIndexRoute = AppIndexImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+
+const AppThemeRoute = AppThemeImport.update({
+  id: '/theme',
+  path: '/theme',
+  getParentRoute: () => AppRoute,
+} as any)
+
+const AppRequestRoute = AppRequestImport.update({
+  id: '/request',
+  path: '/request',
+  getParentRoute: () => AppRoute,
+} as any)
+
+const AppAnalysisAnalysisIdRoute = AppAnalysisAnalysisIdImport.update({
+  id: '/analysis/$analysisId',
+  path: '/analysis/$analysisId',
   getParentRoute: () => AppRoute,
 } as any)
 
@@ -52,11 +73,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginImport
       parentRoute: typeof rootRoute
     }
+    '/_app/request': {
+      id: '/_app/request'
+      path: '/request'
+      fullPath: '/request'
+      preLoaderRoute: typeof AppRequestImport
+      parentRoute: typeof AppImport
+    }
+    '/_app/theme': {
+      id: '/_app/theme'
+      path: '/theme'
+      fullPath: '/theme'
+      preLoaderRoute: typeof AppThemeImport
+      parentRoute: typeof AppImport
+    }
     '/_app/': {
       id: '/_app/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AppIndexImport
+      parentRoute: typeof AppImport
+    }
+    '/_app/analysis/$analysisId': {
+      id: '/_app/analysis/$analysisId'
+      path: '/analysis/$analysisId'
+      fullPath: '/analysis/$analysisId'
+      preLoaderRoute: typeof AppAnalysisAnalysisIdImport
       parentRoute: typeof AppImport
     }
   }
@@ -65,11 +107,17 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 interface AppRouteChildren {
+  AppRequestRoute: typeof AppRequestRoute
+  AppThemeRoute: typeof AppThemeRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppAnalysisAnalysisIdRoute: typeof AppAnalysisAnalysisIdRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppRequestRoute: AppRequestRoute,
+  AppThemeRoute: AppThemeRoute,
   AppIndexRoute: AppIndexRoute,
+  AppAnalysisAnalysisIdRoute: AppAnalysisAnalysisIdRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
@@ -77,27 +125,49 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 export interface FileRoutesByFullPath {
   '': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
+  '/request': typeof AppRequestRoute
+  '/theme': typeof AppThemeRoute
   '/': typeof AppIndexRoute
+  '/analysis/$analysisId': typeof AppAnalysisAnalysisIdRoute
 }
 
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
+  '/request': typeof AppRequestRoute
+  '/theme': typeof AppThemeRoute
   '/': typeof AppIndexRoute
+  '/analysis/$analysisId': typeof AppAnalysisAnalysisIdRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
+  '/_app/request': typeof AppRequestRoute
+  '/_app/theme': typeof AppThemeRoute
   '/_app/': typeof AppIndexRoute
+  '/_app/analysis/$analysisId': typeof AppAnalysisAnalysisIdRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '' | '/login' | '/'
+  fullPaths:
+    | ''
+    | '/login'
+    | '/request'
+    | '/theme'
+    | '/'
+    | '/analysis/$analysisId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/'
-  id: '__root__' | '/_app' | '/login' | '/_app/'
+  to: '/login' | '/request' | '/theme' | '/' | '/analysis/$analysisId'
+  id:
+    | '__root__'
+    | '/_app'
+    | '/login'
+    | '/_app/request'
+    | '/_app/theme'
+    | '/_app/'
+    | '/_app/analysis/$analysisId'
   fileRoutesById: FileRoutesById
 }
 
@@ -128,14 +198,29 @@ export const routeTree = rootRoute
     "/_app": {
       "filePath": "_app.tsx",
       "children": [
-        "/_app/"
+        "/_app/request",
+        "/_app/theme",
+        "/_app/",
+        "/_app/analysis/$analysisId"
       ]
     },
     "/login": {
       "filePath": "login.tsx"
     },
+    "/_app/request": {
+      "filePath": "_app/request.tsx",
+      "parent": "/_app"
+    },
+    "/_app/theme": {
+      "filePath": "_app/theme.tsx",
+      "parent": "/_app"
+    },
     "/_app/": {
       "filePath": "_app/index.tsx",
+      "parent": "/_app"
+    },
+    "/_app/analysis/$analysisId": {
+      "filePath": "_app/analysis/$analysisId.tsx",
       "parent": "/_app"
     }
   }

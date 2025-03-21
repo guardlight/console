@@ -1,5 +1,4 @@
-import { useAuth } from "@/components/auth/auth";
-import { Button } from "@/components/ui/button";
+import LoginScreen from "@/components/app/login/login.screen";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/login")({
@@ -14,18 +13,5 @@ export const Route = createFileRoute("/login")({
 });
 
 function RouteComponent() {
-    const auth = useAuth();
-
-    const navigate = Route.useNavigate();
-
-    const login = () => {
-        auth.login("user").then(() => navigate({ to: "/" }));
-    };
-
-    return (
-        <div>
-            Hello "/_auth/login"!
-            <Button onClick={() => login()}>Log in now!</Button>
-        </div>
-    );
+    return <LoginScreen />;
 }
