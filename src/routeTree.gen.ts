@@ -14,8 +14,9 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as LoginImport } from './routes/login'
 import { Route as AppImport } from './routes/_app'
 import { Route as AppIndexImport } from './routes/_app/index'
-import { Route as AppThemeImport } from './routes/_app/theme'
 import { Route as AppRequestImport } from './routes/_app/request'
+import { Route as AppThemeIndexImport } from './routes/_app/theme/index'
+import { Route as AppThemeThemeIdImport } from './routes/_app/theme/$themeId'
 import { Route as AppAnalysisAnalysisIdImport } from './routes/_app/analysis/$analysisId'
 
 // Create/Update Routes
@@ -37,15 +38,21 @@ const AppIndexRoute = AppIndexImport.update({
   getParentRoute: () => AppRoute,
 } as any)
 
-const AppThemeRoute = AppThemeImport.update({
-  id: '/theme',
-  path: '/theme',
-  getParentRoute: () => AppRoute,
-} as any)
-
 const AppRequestRoute = AppRequestImport.update({
   id: '/request',
   path: '/request',
+  getParentRoute: () => AppRoute,
+} as any)
+
+const AppThemeIndexRoute = AppThemeIndexImport.update({
+  id: '/theme/',
+  path: '/theme/',
+  getParentRoute: () => AppRoute,
+} as any)
+
+const AppThemeThemeIdRoute = AppThemeThemeIdImport.update({
+  id: '/theme/$themeId',
+  path: '/theme/$themeId',
   getParentRoute: () => AppRoute,
 } as any)
 
@@ -80,13 +87,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRequestImport
       parentRoute: typeof AppImport
     }
-    '/_app/theme': {
-      id: '/_app/theme'
-      path: '/theme'
-      fullPath: '/theme'
-      preLoaderRoute: typeof AppThemeImport
-      parentRoute: typeof AppImport
-    }
     '/_app/': {
       id: '/_app/'
       path: '/'
@@ -101,6 +101,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAnalysisAnalysisIdImport
       parentRoute: typeof AppImport
     }
+    '/_app/theme/$themeId': {
+      id: '/_app/theme/$themeId'
+      path: '/theme/$themeId'
+      fullPath: '/theme/$themeId'
+      preLoaderRoute: typeof AppThemeThemeIdImport
+      parentRoute: typeof AppImport
+    }
+    '/_app/theme/': {
+      id: '/_app/theme/'
+      path: '/theme'
+      fullPath: '/theme'
+      preLoaderRoute: typeof AppThemeIndexImport
+      parentRoute: typeof AppImport
+    }
   }
 }
 
@@ -108,16 +122,18 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppRequestRoute: typeof AppRequestRoute
-  AppThemeRoute: typeof AppThemeRoute
   AppIndexRoute: typeof AppIndexRoute
   AppAnalysisAnalysisIdRoute: typeof AppAnalysisAnalysisIdRoute
+  AppThemeThemeIdRoute: typeof AppThemeThemeIdRoute
+  AppThemeIndexRoute: typeof AppThemeIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppRequestRoute: AppRequestRoute,
-  AppThemeRoute: AppThemeRoute,
   AppIndexRoute: AppIndexRoute,
   AppAnalysisAnalysisIdRoute: AppAnalysisAnalysisIdRoute,
+  AppThemeThemeIdRoute: AppThemeThemeIdRoute,
+  AppThemeIndexRoute: AppThemeIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
@@ -126,17 +142,19 @@ export interface FileRoutesByFullPath {
   '': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/request': typeof AppRequestRoute
-  '/theme': typeof AppThemeRoute
   '/': typeof AppIndexRoute
   '/analysis/$analysisId': typeof AppAnalysisAnalysisIdRoute
+  '/theme/$themeId': typeof AppThemeThemeIdRoute
+  '/theme': typeof AppThemeIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/request': typeof AppRequestRoute
-  '/theme': typeof AppThemeRoute
   '/': typeof AppIndexRoute
   '/analysis/$analysisId': typeof AppAnalysisAnalysisIdRoute
+  '/theme/$themeId': typeof AppThemeThemeIdRoute
+  '/theme': typeof AppThemeIndexRoute
 }
 
 export interface FileRoutesById {
@@ -144,9 +162,10 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/_app/request': typeof AppRequestRoute
-  '/_app/theme': typeof AppThemeRoute
   '/_app/': typeof AppIndexRoute
   '/_app/analysis/$analysisId': typeof AppAnalysisAnalysisIdRoute
+  '/_app/theme/$themeId': typeof AppThemeThemeIdRoute
+  '/_app/theme/': typeof AppThemeIndexRoute
 }
 
 export interface FileRouteTypes {
@@ -155,19 +174,27 @@ export interface FileRouteTypes {
     | ''
     | '/login'
     | '/request'
-    | '/theme'
     | '/'
     | '/analysis/$analysisId'
+    | '/theme/$themeId'
+    | '/theme'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/request' | '/theme' | '/' | '/analysis/$analysisId'
+  to:
+    | '/login'
+    | '/request'
+    | '/'
+    | '/analysis/$analysisId'
+    | '/theme/$themeId'
+    | '/theme'
   id:
     | '__root__'
     | '/_app'
     | '/login'
     | '/_app/request'
-    | '/_app/theme'
     | '/_app/'
     | '/_app/analysis/$analysisId'
+    | '/_app/theme/$themeId'
+    | '/_app/theme/'
   fileRoutesById: FileRoutesById
 }
 
@@ -199,9 +226,10 @@ export const routeTree = rootRoute
       "filePath": "_app.tsx",
       "children": [
         "/_app/request",
-        "/_app/theme",
         "/_app/",
-        "/_app/analysis/$analysisId"
+        "/_app/analysis/$analysisId",
+        "/_app/theme/$themeId",
+        "/_app/theme/"
       ]
     },
     "/login": {
@@ -211,16 +239,20 @@ export const routeTree = rootRoute
       "filePath": "_app/request.tsx",
       "parent": "/_app"
     },
-    "/_app/theme": {
-      "filePath": "_app/theme.tsx",
-      "parent": "/_app"
-    },
     "/_app/": {
       "filePath": "_app/index.tsx",
       "parent": "/_app"
     },
     "/_app/analysis/$analysisId": {
       "filePath": "_app/analysis/$analysisId.tsx",
+      "parent": "/_app"
+    },
+    "/_app/theme/$themeId": {
+      "filePath": "_app/theme/$themeId.tsx",
+      "parent": "/_app"
+    },
+    "/_app/theme/": {
+      "filePath": "_app/theme/index.tsx",
       "parent": "/_app"
     }
   }

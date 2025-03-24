@@ -49,7 +49,7 @@ export type Theme = {
 
 export type Analyzer = {
     key: string;
-    threshold: number;
+    threshold: number; // TODO This is an input
     name: string;
     description: string;
     inputs: Array<AnalyzerInput>;

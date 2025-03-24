@@ -1,4 +1,4 @@
-import { AnalysisScreen } from "@/components/app/analysis/analysis.screen";
+import { HomeScreen } from "@/components/app/home/home.screen";
 import { AnalysisRequestResult } from "@/domain/analysis/type";
 import { createFileRoute } from "@tanstack/react-router";
 
@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_app/")({
 });
 
 function RouteComponent() {
-    return <AnalysisScreen analyses={Route.useLoaderData()} />;
+    return <HomeScreen analyses={Route.useLoaderData()} />;
 }
 
 const ANALYSES: Array<AnalysisRequestResult> = [

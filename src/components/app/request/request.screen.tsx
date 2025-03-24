@@ -12,10 +12,10 @@ import {
 import { Parser } from "@/domain/parser/type";
 import { ThemeConfig } from "@/domain/theme/type";
 import { cn } from "@/lib/utils";
-import { useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
-import { PropsWithChildren, useState } from "react";
-import { LuDelete } from "react-icons/lu";
+import { PropsWithChildren, ReactNode, useState } from "react";
+import { LuLoaderCircle } from "react-icons/lu";
 
 type IRequestScreen = {
     parsers: Array<Parser>;
@@ -102,31 +102,23 @@ export default function RequestScreen({
         });
     };
 
-    const navigate = useNavigate();
-
-    const goBackWithReplace = () => {
-        navigate({ to: "/", replace: true });
-    };
+    const submitAnalysisRequest = () => {};
 
     return (
         <div className='flex flex-1 grow flex-col max-w-3xl space-y-3 my-24'>
-            <div>
-                <Button
-                    variant='outline'
-                    className='items-center w-auto'
-                    onClick={goBackWithReplace}
-                >
-                    <LuDelete strokeWidth={1.25} />
-                    Cancel Request
-                </Button>
-            </div>
             <StepLayout
                 open={steps.includes(0)}
                 index={1}
                 title='Analysis Request Title'
                 active={steps.includes(0)}
-                next={() => addStep(1)}
-                canGoNext={ar.title.length > 0}
+                nextButton={() => (
+                    <Button
+                        disabled={!(ar.title.length > 0)}
+                        onClick={() => addStep(1)}
+                    >
+                        Next Step
+                    </Button>
+                )}
                 steps={steps}
             >
                 <div className='space-y-3'>
@@ -167,8 +159,14 @@ export default function RequestScreen({
                 index={2}
                 title='Select Analysis Media Type'
                 active={steps.includes(1)}
-                next={() => addStep(2)}
-                canGoNext={ar.file.mimetype.length > 0}
+                nextButton={() => (
+                    <Button
+                        disabled={!(ar.file.mimetype.length > 0)}
+                        onClick={() => addStep(2)}
+                    >
+                        Next Step
+                    </Button>
+                )}
                 steps={steps}
             >
                 <div className='grid grid-cols-2 gap-3'>
@@ -187,8 +185,14 @@ export default function RequestScreen({
                 index={3}
                 title='Add Analysis Media Content'
                 active={steps.includes(2)}
-                next={() => addStep(3)}
-                canGoNext={ar.file.content.length > 0}
+                nextButton={() => (
+                    <Button
+                        disabled={!(ar.file.content.length > 0)}
+                        onClick={() => addStep(3)}
+                    >
+                        Next Step
+                    </Button>
+                )}
                 steps={steps}
             >
                 {ar.file.mimetype === "freetext" && (
@@ -211,8 +215,14 @@ export default function RequestScreen({
                 index={4}
                 title='Select Analysis Themes'
                 active={steps.includes(3)}
-                next={() => addStep(4)}
-                canGoNext={ar.themes.length > 0}
+                nextButton={() => (
+                    <Button
+                        disabled={!(ar.themes.length > 0)}
+                        onClick={() => addStep(4)}
+                    >
+                        Next Step
+                    </Button>
+                )}
                 steps={steps}
             >
                 <div className='grid grid-cols-2 gap-3'>
@@ -231,8 +241,9 @@ export default function RequestScreen({
                 index={5}
                 title='Analysis Techniques Used'
                 active={steps.includes(4)}
-                next={() => addStep(5)}
-                canGoNext={true}
+                nextButton={() => (
+                    <Button onClick={() => addStep(5)}>Next Step</Button>
+                )}
                 steps={steps}
             >
                 <div className='grid grid-cols-2 gap-3'>
@@ -262,12 +273,21 @@ export default function RequestScreen({
                 index={6}
                 title='Submit Analysis Request'
                 active={steps.includes(5)}
-                next={() => addStep(6)}
-                canGoNext={false}
+                nextButton={() => (
+                    <Button onClick={() => submitAnalysisRequest()}>
+                        <LuLoaderCircle className='animate-spin' />
+                        Submit Analysis Request
+                    </Button>
+                )}
                 steps={steps}
             >
                 <Summary ar={ar} />
             </StepLayout>
+            <div>
+                <Link to='..' replace>
+                    <Button variant='cancel'>Cancel Request</Button>
+                </Link>
+            </div>
         </div>
     );
 }
@@ -408,21 +428,13 @@ function AnalyzerType({
     themes,
     ...props
 }: IAnalyzerType & React.HTMLAttributes<HTMLDivElement>) {
-    const selectedStyles: Record<string, string> = {
-        true: clsx`border-primary`,
-        false: clsx`border-slate-200 hover:border-slate-400`,
-    };
-
     const themeTitles = themes
         .filter((theme) => theme.analyzers.some((a) => a.key === analyzer.key))
         .map((theme) => theme.title);
 
     return (
         <Card
-            className={cn(
-                "gap-0 p-3 cursor-pointer",
-                selectedStyles[String(selected)]
-            )}
+            className={cn("gap-0 p-3 border-dashed border-primary")}
             {...props}
         >
             <CardHeader className='text-lg px-0'>{analyzer.name}</CardHeader>
@@ -445,8 +457,7 @@ type IStepLayout = {
     active: boolean;
     index: number;
     title: string;
-    next: () => void;
-    canGoNext: boolean;
+    nextButton: () => ReactNode;
     steps: Array<number>;
 };
 function StepLayout({
@@ -455,9 +466,8 @@ function StepLayout({
     active,
     index,
     title,
-    next,
-    canGoNext,
     steps,
+    nextButton,
 }: PropsWithChildren & IStepLayout) {
     const activeStyles: Record<string, string> = {
         true: clsx`bg-primary text-white`,
@@ -488,9 +498,7 @@ function StepLayout({
                         {children}
                         {steps[steps.length - 1] === index - 1 && (
                             <div className='flex justify-end mt-3'>
-                                <Button disabled={!canGoNext} onClick={next}>
-                                    Next Step
-                                </Button>
+                                {nextButton()}
                             </div>
                         )}
                     </div>

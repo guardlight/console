@@ -15,3 +15,5 @@ export const CONTENT_TYPE_NAME_MAP: Record<ContentType, string> = {
     series: "Series",
     lyrics: "Lyrics",
 };
+
+export const NIL_UUID = "00000000-0000-0000-0000-000000000000";

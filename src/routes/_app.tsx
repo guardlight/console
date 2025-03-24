@@ -1,10 +1,4 @@
-import { Button } from "@/components/ui/button";
-import {
-    createFileRoute,
-    Link,
-    Outlet,
-    redirect,
-} from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_app")({
     beforeLoad: ({ context }) => {
@@ -30,14 +24,9 @@ function RouteComponent() {
 
 function Header() {
     return (
-        <div className='flex justify-between items-center p-4 mx-4'>
+        <div className='flex justify-between items-center p-4 mx-4 sticky top-0'>
             <div className='text-3xl font-bold'>Guardlight</div>
             <div className='space-x-4'>
-                <Link to='/theme'>
-                    <Button variant='outline' onClick={() => Route.useNavigate}>
-                        Theme Configuration
-                    </Button>
-                </Link>
                 {/* <Button variant='outline'>Settings</Button> */}
             </div>
         </div>

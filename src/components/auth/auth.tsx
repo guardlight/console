@@ -9,7 +9,7 @@ export interface AuthContext {
 
 const AuthContext = React.createContext<AuthContext | null>(null);
 
-const key = "tanstack.auth.user";
+const key = "guardlight.auth.user";
 
 function getStoredUser() {
     return localStorage.getItem(key);
