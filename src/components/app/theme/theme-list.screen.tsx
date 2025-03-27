@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ThemeConfig } from "@/domain/theme/type";
 import { Link } from "@tanstack/react-router";
-import { LuArrowLeft, LuArrowRight } from "react-icons/lu";
+import { LuArrowRight } from "react-icons/lu";
 
 type IThemeListScreen = {
     themes: Array<ThemeConfig>;
@@ -11,13 +11,13 @@ type IThemeListScreen = {
 export default function ThemeListScreen({ themes }: IThemeListScreen) {
     return (
         <div className='flex flex-1 grow flex-col max-w-2xl space-y-5 mt-24'>
-            <div className='flex gap-2 justify-between items-center'>
-                <Link to='..' params={{ themeId: NIL_UUID }} replace>
+            <div className='flex gap-2 justify-end'>
+                {/* <Link to='..' params={{ themeId: NIL_UUID }} replace>
                     <Button variant='outline'>
                         <LuArrowLeft />
                         Home
                     </Button>
-                </Link>
+                </Link> */}
                 <Link to='/theme/$themeId' params={{ themeId: NIL_UUID }}>
                     <Button>New Theme Configuration</Button>
                 </Link>

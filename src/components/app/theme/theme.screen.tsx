@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { BackLink } from "@/components/ui/custom/BackLink";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,7 +12,6 @@ import {
 } from "@/domain/theme/type";
 import { cn } from "@/lib/utils";
 import { TooltipProvider, TooltipTrigger } from "@radix-ui/react-tooltip";
-import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
 import { useState } from "react";
 
@@ -59,9 +59,9 @@ export default function ThemeScreen({ themeConfig }: IThemeScreen) {
                     })}
                 </div>
                 <div className='flex justify-between items-center'>
-                    <Link to='..' replace>
+                    <BackLink>
                         <Button variant='cancel'>Cancel configuration</Button>
-                    </Link>
+                    </BackLink>
                     <Button className=''>Save Theme</Button>
                 </div>
             </div>

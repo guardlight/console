@@ -1,6 +1,7 @@
 import { CONTENT_TYPE_NAME_MAP, ICON_MAP } from "@/components/const/const";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
+import { BackLink } from "@/components/ui/custom/BackLink";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -12,7 +13,6 @@ import {
 import { Parser } from "@/domain/parser/type";
 import { ThemeConfig } from "@/domain/theme/type";
 import { cn } from "@/lib/utils";
-import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
 import { PropsWithChildren, ReactNode, useState } from "react";
 import { LuLoaderCircle } from "react-icons/lu";
@@ -284,9 +284,9 @@ export default function RequestScreen({
                 <Summary ar={ar} />
             </StepLayout>
             <div>
-                <Link to='..' replace>
+                <BackLink>
                     <Button variant='cancel'>Cancel Request</Button>
-                </Link>
+                </BackLink>
             </div>
         </div>
     );

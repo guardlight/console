@@ -42,8 +42,8 @@ const statusMap: Record<AnalysisStatus, ReactNode> = {
 };
 
 const borderColorMap: Record<"good" | "bad" | "neutral", string> = {
-    good: clsx(`border-green-400 shadow-green-100`),
-    bad: clsx(`border-red-400 shadow-red-100`),
+    good: clsx(`border-emerald-400 shadow-green-200`),
+    bad: clsx(`border-red-400 shadow-red-200`),
     neutral: clsx(``),
 };
 
@@ -52,7 +52,9 @@ type IAnalysis = {
 };
 function AnalysisItem({ analysisRequest }: IAnalysis) {
     const statusComputed = useCallback((): AnalysisStatus => {
-        const statuses = analysisRequest.analysis.map((a) => a.status);
+        const statuses = analysisRequest.themes
+            .flatMap((t) => t.analysis)
+            .map((a) => a.status);
         if (statuses.includes("error")) {
             return "error";
         } else if (statuses.every((status) => status === "waiting")) {
@@ -76,13 +78,17 @@ function AnalysisItem({ analysisRequest }: IAnalysis) {
     }, [analysisRequest]);
 
     const borderColor = useCallback((): string => {
-        if (
-            statusComputed() === "inprogress" ||
-            statusComputed() == "finished"
-        ) {
-            const overThreshold = analysisRequest.analysis.some(
-                (a) => a.score > a.threshold
-            );
+        if (statusComputed() == "finished") {
+            const overThreshold = analysisRequest.themes
+                .flatMap((t) => t.analysis)
+                .some(
+                    (a) =>
+                        a.score >
+                        +(
+                            a.inputs.find((i) => i.key === "threshold")
+                                ?.value || "0"
+                        )
+                );
             if (overThreshold) {
                 return borderColorMap["bad"];
             }
@@ -91,28 +97,38 @@ function AnalysisItem({ analysisRequest }: IAnalysis) {
         return borderColorMap["neutral"];
     }, [analysisRequest]);
 
+    const isProcessing =
+        statusComputed() === "inprogress" || statusComputed() === "waiting";
+
     return (
         <Link
             to='/analysis/$analysisId'
             params={{ analysisId: analysisRequest.id }}
         >
-            <Card
+            <div
                 className={cn(
-                    " p-4 flex flex-row grow items-center justify-between cursor-pointer transform transition-transform duration-50 active:scale-97 hover:scale-99",
-                    borderColor()
+                    "rounded-xl cursor-pointer transform transition-transform duration-50 active:scale-97 hover:scale-99",
+                    isProcessing ? "progressing-effect" : ""
                 )}
             >
-                <div className='flex items-center space-x-5'>
-                    <div>{icon()}</div>
-                    <div className='text tracking-wider'>
-                        {analysisRequest.title}
+                <Card
+                    className={cn(
+                        "p-4 flex flex-row grow items-center justify-between ",
+                        borderColor()
+                    )}
+                >
+                    <div className='flex items-center space-x-5'>
+                        <div>{icon()}</div>
+                        <div className='text tracking-wider'>
+                            {analysisRequest.title}
+                        </div>
                     </div>
-                </div>
-                <div className='flex items-center space-x-8'>
-                    {status()}
-                    <LuArrowRight className='size-6' strokeWidth={1.5} />
-                </div>
-            </Card>
+                    <div className='flex items-center space-x-8'>
+                        {status()}
+                        <LuArrowRight className='size-6' strokeWidth={1.5} />
+                    </div>
+                </Card>
+            </div>
         </Link>
     );
 }
