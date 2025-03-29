@@ -1,36 +1,84 @@
 import { NIL_UUID } from "@/components/const/const";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import DataLoaderSpinner from "@/components/ui/custom/DataLoader";
+import EmptyList from "@/components/ui/custom/EmptyList";
+import ErrorSoftner from "@/components/ui/custom/ErrorSoftner";
+import InvalidateQuery from "@/components/ui/custom/Invalidate.hook";
+import { ThemeKeys } from "@/domain/theme/api";
 import { ThemeConfig } from "@/domain/theme/type";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { LuArrowRight } from "react-icons/lu";
+import { LuArrowRight, LuRefreshCw } from "react-icons/lu";
 
-type IThemeListScreen = {
-    themes: Array<ThemeConfig>;
-};
-export default function ThemeListScreen({ themes }: IThemeListScreen) {
+type IThemeListScreen = {};
+export default function ThemeListScreen({}: IThemeListScreen) {
+    const { data, isFetching, isRefetching, error } = useQuery(
+        ThemeKeys.themes()
+    );
+
+    const { invs } = InvalidateQuery();
+
     return (
         <div className='flex flex-1 grow flex-col max-w-2xl space-y-5 mt-24'>
             <div className='flex gap-2 justify-end'>
-                {/* <Link to='..' params={{ themeId: NIL_UUID }} replace>
-                    <Button variant='outline'>
-                        <LuArrowLeft />
-                        Home
-                    </Button>
-                </Link> */}
+                <Button
+                    variant='ghost'
+                    className='text-muted-foreground'
+                    onClick={() => invs(ThemeKeys.themes().queryKey)}
+                >
+                    <LuRefreshCw
+                        strokeWidth={1.25}
+                        className={isRefetching ? "animate-spin" : ""}
+                    />
+                    Refresh
+                </Button>
+                <div className='grow' />
                 <Link to='/theme/$themeId' params={{ themeId: NIL_UUID }}>
                     <Button>New Theme Configuration</Button>
                 </Link>
             </div>
             <div className='flex flex-1 flex-col space-y-3'>
-                {themes
-                    .filter((theme) => theme.id !== NIL_UUID)
-                    .map((theme) => (
-                        <ThemeListItem themeConfig={theme} />
-                    ))}
+                <ThemesLoading
+                    isFetching={isFetching}
+                    error={error}
+                    themes={data}
+                />
             </div>
         </div>
     );
+}
+
+type IThemesLoading = {
+    error: Error | null;
+    isFetching: boolean;
+    themes?: Array<ThemeConfig>;
+};
+function ThemesLoading({ isFetching, themes, error }: IThemesLoading) {
+    if (isFetching) return <DataLoaderSpinner title='Loading your themes.' />;
+
+    if (error)
+        return (
+            <ErrorSoftner
+                title="Couldn't load your themes."
+                queryKeys={ThemeKeys.themes().queryKey}
+            />
+        );
+
+    if (!themes || themes.length === 0)
+        return (
+            <EmptyList title='No themes created yet.'>
+                <p>
+                    Click on{" "}
+                    <span className='font-medium'>New Theme Configuration</span>{" "}
+                    to get started.
+                </p>
+            </EmptyList>
+        );
+
+    return themes
+        .filter((theme) => theme.id !== NIL_UUID)
+        .map((theme) => <ThemeListItem themeConfig={theme} />);
 }
 
 type IThemeListItem = {

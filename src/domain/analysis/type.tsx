@@ -1,37 +1,7 @@
 export type AnalysisStatus = "waiting" | "inprogress" | "finished" | "error";
 export type ContentType = "book" | "movie" | "series" | "lyrics";
 
-export type AnalysisRequestResult = {
-    id: string;
-    title: string;
-    contentType: ContentType;
-    themes: Array<ThemeResult>;
-};
-
-export type ThemeResult = {
-    id: string;
-    title: string;
-    analysis: Array<AnalysisResult>;
-};
-
-export type AnalysisResult = {
-    analyzerKey: string;
-    name: string;
-    status: AnalysisStatus;
-    score: number;
-    content: Array<string>;
-    inputs: Array<AnalysisInput>;
-    jobs: Array<JobProgress>;
-};
-
-export type AnalysisInput = {
-    key: string;
-    value: string;
-};
-
-export type JobProgress = {
-    status: AnalysisStatus;
-};
+// Analysis Request
 
 export type AnalysisRequest = {
     title: string;
@@ -53,7 +23,6 @@ export type Theme = {
 
 export type Analyzer = {
     key: string;
-    threshold: number; // TODO This is an input
     name: string;
     description: string;
     inputs: Array<AnalyzerInput>;
@@ -62,6 +31,41 @@ export type Analyzer = {
 export type AnalyzerInput = {
     key: string;
     value: string;
+};
+
+// Analysis Results
+
+export type AnalysisRequestResult = {
+    id: string;
+    title: string;
+    contentType: ContentType;
+    themes: Array<ThemeResult>;
+};
+
+export type ThemeResult = {
+    id: string;
+    title: string;
+    analyzers: Array<AnalyzerResult>;
+};
+
+export type AnalyzerResult = {
+    key: string;
+    name: string;
+    status: AnalysisStatus;
+    score: number;
+    content: Array<string>;
+    inputs: Array<AnalyzerInputResult>;
+    jobs: Array<JobProgress>;
+};
+
+export type AnalyzerInputResult = {
+    key: string;
+    name: string;
+    value: string;
+};
+
+export type JobProgress = {
+    status: AnalysisStatus;
 };
 
 export const NIL_ANALYSIS_RESULT: AnalysisRequestResult = {
@@ -80,9 +84,9 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
             {
                 id: "25681972-0638-4a8d-8144-105b403456cd",
                 title: "Acts of Violence",
-                analysis: [
+                analyzers: [
                     {
-                        analyzerKey: "word_search",
+                        key: "word_search",
                         name: "Word Search",
                         status: "inprogress",
                         score: 0.24,
@@ -90,10 +94,12 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
                         inputs: [
                             {
                                 key: "strict_words",
+                                name: "Strict Words",
                                 value: "Fighting, Walking",
                             },
                             {
                                 key: "threshold",
+                                name: "Threshold",
                                 value: "0.9",
                             },
                         ],
@@ -107,7 +113,7 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
                         ],
                     },
                     {
-                        analyzerKey: "sentiment_analysis",
+                        key: "sentiment_analysis",
                         name: "Sentiment Analysis",
                         status: "finished",
                         score: 0.24,
@@ -115,10 +121,12 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
                         inputs: [
                             {
                                 key: "contextual_words",
+                                name: "Contextual Words",
                                 value: "Fighting, Walking",
                             },
                             {
                                 key: "threshold",
+                                name: "Threshold",
                                 value: "0.9",
                             },
                         ],
@@ -136,9 +144,9 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
             {
                 id: "d3be4fb5-9345-42d3-8d1a-ba7b3680d75e",
                 title: "Relegious Sensitivity",
-                analysis: [
+                analyzers: [
                     {
-                        analyzerKey: "word_search",
+                        key: "word_search",
                         name: "Word Search",
                         status: "finished",
                         score: 0.24,
@@ -146,10 +154,12 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
                         inputs: [
                             {
                                 key: "strict_words",
+                                name: "Strict Words",
                                 value: "Fighting, Walking",
                             },
                             {
                                 key: "threshold",
+                                name: "Threshold",
                                 value: "0.9",
                             },
                         ],
@@ -174,9 +184,9 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
             {
                 id: "25681972-0638-4a8d-8144-105b403456cd",
                 title: "Acts of Violence",
-                analysis: [
+                analyzers: [
                     {
-                        analyzerKey: "word_search",
+                        key: "word_search",
                         name: "Word Search",
                         status: "waiting",
                         score: 0.24,
@@ -184,10 +194,12 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
                         inputs: [
                             {
                                 key: "strict_words",
+                                name: "Strict Words",
                                 value: "Fighting, Walking",
                             },
                             {
                                 key: "threshold",
+                                name: "Threshold",
                                 value: "0.9",
                             },
                         ],
@@ -201,7 +213,7 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
                         ],
                     },
                     {
-                        analyzerKey: "sentiment_analysis",
+                        key: "sentiment_analysis",
                         name: "Sentiment Analysis",
                         status: "waiting",
                         score: 0.24,
@@ -211,10 +223,12 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
                         inputs: [
                             {
                                 key: "contextual_words",
+                                name: "Contextual Words",
                                 value: "Fighting, Walking",
                             },
                             {
                                 key: "threshold",
+                                name: "Threshold",
                                 value: "0.9",
                             },
                         ],
@@ -232,9 +246,9 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
             {
                 id: "c5770399-dec1-4065-bd3d-8ebab9893a7a",
                 title: "Relegious Sensitivity",
-                analysis: [
+                analyzers: [
                     {
-                        analyzerKey: "word_search",
+                        key: "word_search",
                         name: "Word Search",
                         status: "finished",
                         score: 0.24,
@@ -247,10 +261,12 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
                         inputs: [
                             {
                                 key: "strict_words",
+                                name: "Strict Words",
                                 value: "Lords",
                             },
                             {
                                 key: "threshold",
+                                name: "Threshold",
                                 value: "0.2",
                             },
                         ],
@@ -264,7 +280,7 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
                         ],
                     },
                     {
-                        analyzerKey: "sentiment_analysis",
+                        key: "sentiment_analysis",
                         name: "Sentiment Analysis",
                         status: "waiting",
                         score: 0.24,
@@ -274,10 +290,12 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
                         inputs: [
                             {
                                 key: "contextual_words",
+                                name: "Contextual Words",
                                 value: "Fighting, Walking",
                             },
                             {
                                 key: "threshold",
+                                name: "Threshold",
                                 value: "0.9",
                             },
                         ],
@@ -302,9 +320,9 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
             {
                 id: "25681972-0638-4a8d-8144-105b403456cd",
                 title: "Acts of Violence",
-                analysis: [
+                analyzers: [
                     {
-                        analyzerKey: "word_search",
+                        key: "word_search",
                         name: "Word Search",
                         status: "finished",
                         score: 0.24,
@@ -312,10 +330,12 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
                         inputs: [
                             {
                                 key: "strict_words",
+                                name: "Strict Words",
                                 value: "Fighting, Walking",
                             },
                             {
                                 key: "threshold",
+                                name: "Threshold",
                                 value: "0.6",
                             },
                         ],
@@ -340,9 +360,9 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
             {
                 id: "25681972-0638-4a8d-8144-105b403456cd",
                 title: "Acts of Violence",
-                analysis: [
+                analyzers: [
                     {
-                        analyzerKey: "word_search",
+                        key: "word_search",
                         name: "Word Search",
                         status: "finished",
                         score: 0.24,
@@ -352,10 +372,12 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
                         inputs: [
                             {
                                 key: "strict_words",
+                                name: "Strict Words",
                                 value: "Fighting, Walking",
                             },
                             {
                                 key: "threshold",
+                                name: "Threshold",
                                 value: "0",
                             },
                         ],

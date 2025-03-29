@@ -5,14 +5,20 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion";
 import {
+    HoverCard,
+    HoverCardContent,
+    HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import {
     AnalysisRequestResult,
-    AnalysisResult,
+    AnalyzerInputResult,
+    AnalyzerResult,
     ThemeResult,
 } from "@/domain/analysis/type";
 import { cn } from "@/lib/utils";
 import clsx from "clsx";
 import { useCallback } from "react";
-import { LuLoaderCircle } from "react-icons/lu";
+import { LuFileInput, LuLoaderCircle } from "react-icons/lu";
 
 const StatusColorMap: Record<string, string> = {
     false: clsx(`border-emerald-500 shadow-green-100 text-emerald-700`),
@@ -60,7 +66,7 @@ type IThemeAccordion = {
 };
 function ThemeAccordion({ theme }: IThemeAccordion) {
     const overThreshold = useCallback(() => {
-        return theme.analysis.some(
+        return theme.analyzers.some(
             (a) =>
                 a.score >
                 +(a.inputs.find((i) => i.key === "threshold")?.value || "0")
@@ -71,7 +77,7 @@ function ThemeAccordion({ theme }: IThemeAccordion) {
 
     const statusTitle = StatusThemeTitleMap[String(overThreshold())];
 
-    const themeProcessing = theme.analysis.some(
+    const themeProcessing = theme.analyzers.some(
         (ta) => ta.status === "inprogress" || ta.status === "waiting"
     );
 
@@ -101,7 +107,7 @@ function ThemeAccordion({ theme }: IThemeAccordion) {
                     </div>
                 </AccordionTrigger>
                 <AccordionContent className='space-y-4'>
-                    {theme.analysis.map((a) => (
+                    {theme.analyzers.map((a) => (
                         <AnalysisSection analysis={a} />
                     ))}
                 </AccordionContent>
@@ -126,7 +132,7 @@ const StatusAnalysisMap: Record<string, string> = {
 };
 
 type IAnalysisSection = {
-    analysis: AnalysisResult;
+    analysis: AnalyzerResult;
 };
 function AnalysisSection({ analysis }: IAnalysisSection) {
     const overThreshold =
@@ -143,19 +149,47 @@ function AnalysisSection({ analysis }: IAnalysisSection) {
     return (
         <div className='space-y-3 pl-2 pr-14'>
             <div className='w-full'>
-                <div className='flex items-baseline space-x-2'>
-                    <div className='font-medium text-lg'>{analysis.name}</div>
-                    {!isProcessing && (
-                        <span
-                            className={cn(
-                                "text-sm font-extralight rounded-md",
-                                borderColor
-                            )}
-                        >
-                            {statusTitle}
-                        </span>
-                    )}
+                <div className='flex justify-between items-baseline'>
+                    <div className='flex items-baseline space-x-2'>
+                        <div className='font-medium text-lg'>
+                            {analysis.name}
+                        </div>
+                        {!isProcessing ? (
+                            <span
+                                className={cn(
+                                    "text-sm font-extralight rounded-md",
+                                    borderColor
+                                )}
+                            >
+                                {statusTitle}
+                            </span>
+                        ) : (
+                            <></>
+                        )}
+                    </div>
+                    <HoverCard openDelay={0}>
+                        <HoverCardTrigger asChild>
+                            <span className='text-muted-foreground text-sm font-extralight flex items-center gap-1 mr-1 cursor-pointer'>
+                                Inputs
+                                <LuFileInput
+                                    className='text-muted-foreground'
+                                    strokeWidth={1.25}
+                                />
+                            </span>
+                        </HoverCardTrigger>
+                        <HoverCardContent side='right'>
+                            <div className='space-y-3'>
+                                {analysis.inputs.map((ai) => (
+                                    <AnalysisInputItem
+                                        key={ai.key}
+                                        input={ai}
+                                    />
+                                ))}
+                            </div>
+                        </HoverCardContent>
+                    </HoverCard>
                 </div>
+
                 <div className='size-[1px] bg-gray-300 rounded-4xl w-full ' />
             </div>
 
@@ -185,6 +219,18 @@ function AnalysisSection({ analysis }: IAnalysisSection) {
                     ))}
                 </div>
             )}
+        </div>
+    );
+}
+
+type IAnalysisInputItem = {
+    input: AnalyzerInputResult;
+};
+function AnalysisInputItem({ input }: IAnalysisInputItem) {
+    return (
+        <div>
+            <div className='font-medium'>{input.name}</div>
+            <div className='text-sm font-light'>{input.value}</div>
         </div>
     );
 }

@@ -1,20 +1,42 @@
 import { ICON_MAP } from "@/components/const/const";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import DataLoaderSpinner from "@/components/ui/custom/DataLoader";
+import EmptyList from "@/components/ui/custom/EmptyList";
+import ErrorSoftner from "@/components/ui/custom/ErrorSoftner";
+import InvalidateQuery from "@/components/ui/custom/Invalidate.hook";
+import { AnalysisKeys } from "@/domain/analysis/api";
 import { AnalysisRequestResult, AnalysisStatus } from "@/domain/analysis/type";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
 import { ReactNode, useCallback } from "react";
-import { LuArrowRight } from "react-icons/lu";
+import { LuArrowRight, LuRefreshCw } from "react-icons/lu";
 
-type IHomeScreen = {
-    analyses: Array<AnalysisRequestResult>;
-};
-export function HomeScreen({ analyses }: IHomeScreen) {
+type IHomeScreen = {};
+export function HomeScreen({}: IHomeScreen) {
+    const { data, isFetching, isRefetching, error } = useQuery(
+        AnalysisKeys.analyses()
+    );
+
+    const { invs } = InvalidateQuery();
+
     return (
         <div className='flex flex-1 grow flex-col max-w-2xl space-y-5 mt-24'>
             <div className='flex justify-end gap-2'>
+                <Button
+                    variant='ghost'
+                    className='text-muted-foreground'
+                    onClick={() => invs(AnalysisKeys.analyses().queryKey)}
+                >
+                    <LuRefreshCw
+                        strokeWidth={1.25}
+                        className={isRefetching ? "animate-spin" : ""}
+                    />
+                    Refresh
+                </Button>
+                <div className='grow' />
                 <Link to='/theme'>
                     <Button variant='outline'>Theme Configuration</Button>
                 </Link>
@@ -23,15 +45,46 @@ export function HomeScreen({ analyses }: IHomeScreen) {
                 </Link>
             </div>
             <div className='flex flex-1 flex-col space-y-3'>
-                {analyses.map((analyses) => (
-                    <AnalysisItem
-                        key={analyses.id}
-                        analysisRequest={analyses}
-                    />
-                ))}
+                <AnalysesLoading
+                    isFetching={isFetching}
+                    analyses={data}
+                    error={error}
+                />
             </div>
         </div>
     );
+}
+
+type IAnalysesLoading = {
+    error: Error | null;
+    isFetching: boolean;
+    analyses?: Array<AnalysisRequestResult>;
+};
+function AnalysesLoading({ isFetching, analyses, error }: IAnalysesLoading) {
+    if (isFetching) return <DataLoaderSpinner title='Loading your analyses.' />;
+
+    if (error)
+        return (
+            <ErrorSoftner
+                title="Couldn't load your analyses."
+                queryKeys={AnalysisKeys.analyses().queryKey}
+            />
+        );
+
+    if (!analyses || analyses.length === 0)
+        return (
+            <EmptyList title='No analyses done yet.'>
+                <p>
+                    Click on{" "}
+                    <span className='font-medium'>Request Analysis</span> to get
+                    started.
+                </p>
+            </EmptyList>
+        );
+
+    return analyses.map((analysis) => (
+        <AnalysisItem key={analysis.id} analysisRequest={analysis} />
+    ));
 }
 
 const statusMap: Record<AnalysisStatus, ReactNode> = {
@@ -53,7 +106,7 @@ type IAnalysis = {
 function AnalysisItem({ analysisRequest }: IAnalysis) {
     const statusComputed = useCallback((): AnalysisStatus => {
         const statuses = analysisRequest.themes
-            .flatMap((t) => t.analysis)
+            .flatMap((t) => t.analyzers)
             .map((a) => a.status);
         if (statuses.includes("error")) {
             return "error";
@@ -80,7 +133,7 @@ function AnalysisItem({ analysisRequest }: IAnalysis) {
     const borderColor = useCallback((): string => {
         if (statusComputed() == "finished") {
             const overThreshold = analysisRequest.themes
-                .flatMap((t) => t.analysis)
+                .flatMap((t) => t.analyzers)
                 .some(
                     (a) =>
                         a.score >

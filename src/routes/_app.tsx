@@ -1,3 +1,5 @@
+import { ThemeKeys } from "@/domain/theme/api";
+import { usePrefetchQuery } from "@tanstack/react-query";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_app")({
@@ -12,6 +14,11 @@ export const Route = createFileRoute("/_app")({
 });
 
 function RouteComponent() {
+    // Load app reqs.
+    // show error that app could not be initialized
+
+    usePrefetchQuery(ThemeKeys.themes());
+
     return (
         <div>
             <Header />
@@ -24,7 +31,7 @@ function RouteComponent() {
 
 function Header() {
     return (
-        <div className='flex justify-between items-center p-4 mx-4 sticky top-0'>
+        <div className='flex justify-between items-center p-4 mx-4 sticky top-0 backdrop-blur-sm'>
             <div className='text-3xl font-bold'>Guardlight</div>
             <div className='space-x-4'>
                 {/* <Button variant='outline'>Settings</Button> */}

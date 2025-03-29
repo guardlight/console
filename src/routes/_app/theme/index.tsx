@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_app/theme/")({
 });
 
 function RouteComponent() {
-    return <ThemeListScreen themes={THEME_CONFIGS} />;
+    return <ThemeListScreen />;
 }
 
 export const THEME_CONFIGS: ThemeConfig[] = [

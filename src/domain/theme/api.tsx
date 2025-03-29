@@ -1,22 +1,14 @@
 import { sleep } from "@/components/auth/auth";
+import { THEME_CONFIGS } from "@/routes/_app/theme";
 import { queryOptions } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { ANALYSES } from "./type";
 
-// export const AnalysisApi = {
-//     getAnalyses: () =>
-//         axiosInstance
-//             .post<Array<AnalysisRequestResult>>("/analyses")
-//             .then(handleResponse)
-//             .catch(handleError),
-// };
-
-export const AnalysisApi = {
-    getAnalyses: async () => {
+export const ThemesApi = {
+    getThemes: async () => {
         await sleep(700);
         const random = Math.random();
         if (random < 1 / 3) {
-            return Promise.resolve(ANALYSES);
+            return Promise.resolve(THEME_CONFIGS);
         } else if (random < 2 / 3) {
             return Promise.resolve([]);
         } else {
@@ -25,11 +17,11 @@ export const AnalysisApi = {
     },
 };
 
-export const AnalysisKeys = {
-    analyses: () =>
+export const ThemeKeys = {
+    themes: () =>
         queryOptions({
-            queryKey: ["analyses"],
-            queryFn: () => AnalysisApi.getAnalyses(),
+            queryKey: ["themes"],
+            queryFn: () => ThemesApi.getThemes(),
             refetchOnWindowFocus: false,
             retry: 0, // remove
             refetchOnMount: false,

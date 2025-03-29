@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { AuthProvider, useAuth } from "./components/auth/auth";
 import { routeTree } from "./routeTree.gen";
@@ -23,11 +24,15 @@ function InnerApp() {
     return <RouterProvider router={router} context={{ auth }} />;
 }
 
+const queryClient = new QueryClient();
+
 function App() {
     return (
-        <AuthProvider>
-            <InnerApp />
-        </AuthProvider>
+        <QueryClientProvider client={queryClient}>
+            <AuthProvider>
+                <InnerApp />
+            </AuthProvider>
+        </QueryClientProvider>
     );
 }
 
