@@ -32,3 +32,5 @@ export const NIL_THEME_CONFIG: ThemeConfig = {
     description: "",
     analyzers: [],
 };
+
+export type ThemeConfigCreateResponse = {};

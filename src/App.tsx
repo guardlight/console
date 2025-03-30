@@ -1,6 +1,9 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { AuthProvider, useAuth } from "./components/auth/auth";
+import { Toaster } from "./components/ui/sonner";
+import { axiosInstance } from "./domain/http/api";
+import { mockThemesApi } from "./domain/theme/api.dev";
 import { routeTree } from "./routeTree.gen";
 
 export const router = createRouter({
@@ -26,11 +29,19 @@ function InnerApp() {
 
 const queryClient = new QueryClient();
 
+if (import.meta.env.MODE === "development") {
+    console.log("setup mock");
+    const MockAdapter = (await import("axios-mock-adapter")).default;
+    const mock = new MockAdapter(axiosInstance);
+    mockThemesApi(mock);
+}
+
 function App() {
     return (
         <QueryClientProvider client={queryClient}>
             <AuthProvider>
                 <InnerApp />
+                <Toaster position='top-right' />
             </AuthProvider>
         </QueryClientProvider>
     );

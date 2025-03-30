@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import DataLoaderSpinner from "@/components/ui/custom/DataLoader";
 import EmptyList from "@/components/ui/custom/EmptyList";
 import ErrorSoftner from "@/components/ui/custom/ErrorSoftner";
-import InvalidateQuery from "@/components/ui/custom/Invalidate.hook";
+import useInvalidateQuery from "@/components/ui/custom/Invalidate.hook";
 import { ThemeKeys } from "@/domain/theme/api";
 import { ThemeConfig } from "@/domain/theme/type";
 import { useQuery } from "@tanstack/react-query";
@@ -17,10 +17,12 @@ export default function ThemeListScreen({}: IThemeListScreen) {
         ThemeKeys.themes()
     );
 
-    const { invs } = InvalidateQuery();
+    const { invs } = useInvalidateQuery();
+
+    const newConfigDisabled = isFetching || Boolean(error) || !!!data;
 
     return (
-        <div className='flex flex-1 grow flex-col max-w-2xl space-y-5 mt-24'>
+        <div className='flex flex-1 grow flex-col max-w-2xl space-y-5 mt-4 md:mt-24'>
             <div className='flex gap-2 justify-end'>
                 <Button
                     variant='ghost'
@@ -34,8 +36,14 @@ export default function ThemeListScreen({}: IThemeListScreen) {
                     Refresh
                 </Button>
                 <div className='grow' />
-                <Link to='/theme/$themeId' params={{ themeId: NIL_UUID }}>
-                    <Button>New Theme Configuration</Button>
+                <Link
+                    disabled={newConfigDisabled}
+                    to='/theme/$themeId'
+                    params={{ themeId: NIL_UUID }}
+                >
+                    <Button disabled={newConfigDisabled}>
+                        New Theme Configuration
+                    </Button>
                 </Link>
             </div>
             <div className='flex flex-1 flex-col space-y-3'>
@@ -65,7 +73,7 @@ function ThemesLoading({ isFetching, themes, error }: IThemesLoading) {
             />
         );
 
-    if (!themes || themes.length === 0)
+    if (!themes || themes.filter((theme) => theme.id !== NIL_UUID).length === 0)
         return (
             <EmptyList title='No themes created yet.'>
                 <p>
@@ -78,7 +86,7 @@ function ThemesLoading({ isFetching, themes, error }: IThemesLoading) {
 
     return themes
         .filter((theme) => theme.id !== NIL_UUID)
-        .map((theme) => <ThemeListItem themeConfig={theme} />);
+        .map((theme) => <ThemeListItem key={theme.id} themeConfig={theme} />);
 }
 
 type IThemeListItem = {

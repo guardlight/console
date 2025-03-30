@@ -1,25 +1,38 @@
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { BackLink } from "@/components/ui/custom/BackLink";
+import useGoBack from "@/components/ui/custom/GoBack.hook";
+import useInvalidateQuery from "@/components/ui/custom/Invalidate.hook";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent } from "@/components/ui/tooltip";
+import { ThemeKeys, ThemesApi } from "@/domain/theme/api";
 import {
     ChangeStatus,
+    NIL_THEME_CONFIG,
     ThemeAnalyzer,
     ThemeAnalyzerInput,
-    ThemeConfig,
 } from "@/domain/theme/type";
 import { cn } from "@/lib/utils";
 import { TooltipProvider, TooltipTrigger } from "@radix-ui/react-tooltip";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Navigate } from "@tanstack/react-router";
 import clsx from "clsx";
+import { AlertCircle } from "lucide-react";
 import { useState } from "react";
+import { LuChartNetwork, LuLoaderCircle } from "react-icons/lu";
+import { toast } from "sonner";
 
 type IThemeScreen = {
-    themeConfig: ThemeConfig;
+    themeConfigId: string;
 };
-export default function ThemeScreen({ themeConfig }: IThemeScreen) {
-    const [localTheme, setLocalTheme] = useState(themeConfig);
+export default function ThemeScreen({ themeConfigId }: IThemeScreen) {
+    const { data, error } = useQuery(ThemeKeys.themes());
+
+    const [localTheme, setLocalTheme] = useState(
+        data?.find((t) => t.id === themeConfigId) || NIL_THEME_CONFIG
+    );
 
     const updateLocalTheme = (title: string) => {
         setLocalTheme((prevState) => ({
@@ -28,10 +41,40 @@ export default function ThemeScreen({ themeConfig }: IThemeScreen) {
         }));
     };
 
+    const { invs } = useInvalidateQuery();
+    const { back } = useGoBack();
+
+    const { mutate: updateThemeConfig, isPending } = useMutation({
+        mutationFn: () => ThemesApi.createTheme(localTheme),
+        onSuccess: () => {
+            invs(ThemeKeys.themes().queryKey);
+            back();
+        },
+        onError: () => {
+            toast.custom(() => (
+                <Alert
+                    variant='destructive'
+                    className='bg-red-50 border-red-300'
+                >
+                    <AlertCircle className='h-4 w-4' />
+                    <AlertTitle>Saving Problem</AlertTitle>
+                    <AlertDescription>
+                        Your theme could not be saved. Please try again.
+                    </AlertDescription>
+                </Alert>
+            ));
+        },
+    });
+
+    if (error || !!!data) {
+        return <Navigate to='..' />;
+    }
+
     return (
         <TooltipProvider>
-            <div className='flex flex-1 grow flex-col max-w-2xl space-y-4 mb-24 mt-16'>
+            <div className='flex flex-1 grow flex-col max-w-2xl space-y-4 mb-24 mt-4 md:mt-16'>
                 <h2 className='text-2xl'>Theme Configuration</h2>
+
                 <div className=''>
                     <Input
                         placeholder='Enter theme name'
@@ -43,8 +86,16 @@ export default function ThemeScreen({ themeConfig }: IThemeScreen) {
                         Request
                     </span>
                 </div>
+                <Alert variant='info' className='border-dashed'>
+                    <LuChartNetwork className='h-4 w-4' />
+                    <AlertTitle>Analyzer Selection</AlertTitle>
+                    <AlertDescription>
+                        If you don't want to use the specific analyzer, don't
+                        fill in anything.
+                    </AlertDescription>
+                </Alert>
                 <div className='space-y-4'>
-                    {themeConfig.analyzers.map((at) => {
+                    {localTheme.analyzers.map((at) => {
                         if (at.changeStatus === "removed") {
                             return (
                                 <AnalyzerConfigRemoved
@@ -59,10 +110,25 @@ export default function ThemeScreen({ themeConfig }: IThemeScreen) {
                     })}
                 </div>
                 <div className='flex justify-between items-center'>
-                    <BackLink>
-                        <Button variant='cancel'>Cancel configuration</Button>
+                    <BackLink disabled={isPending}>
+                        <Button disabled={isPending} variant='cancel'>
+                            Cancel configuration
+                        </Button>
                     </BackLink>
-                    <Button className=''>Save Theme</Button>
+                    <Button
+                        disabled={isPending}
+                        onClick={() => updateThemeConfig()}
+                        className=''
+                    >
+                        <LuLoaderCircle
+                            strokeWidth={1.25}
+                            className={cn(
+                                "animate-spin",
+                                isPending ? "visible" : "hidden"
+                            )}
+                        />
+                        Save Theme
+                    </Button>
                 </div>
             </div>
         </TooltipProvider>

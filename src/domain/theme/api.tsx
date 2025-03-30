@@ -1,20 +1,19 @@
-import { sleep } from "@/components/auth/auth";
-import { THEME_CONFIGS } from "@/routes/_app/theme";
 import { queryOptions } from "@tanstack/react-query";
-import { AxiosError } from "axios";
+import { axiosInstance, handleError, handleResponse } from "../http/api";
+import { ThemeConfig, ThemeConfigCreateResponse } from "./type";
 
 export const ThemesApi = {
-    getThemes: async () => {
-        await sleep(700);
-        const random = Math.random();
-        if (random < 1 / 3) {
-            return Promise.resolve(THEME_CONFIGS);
-        } else if (random < 2 / 3) {
-            return Promise.resolve([]);
-        } else {
-            return Promise.reject(new AxiosError(""));
-        }
-    },
+    getThemes: () =>
+        axiosInstance
+            .get<Array<ThemeConfig>>("theme")
+            .then(handleResponse)
+            .catch(handleError),
+
+    createTheme: (theme: ThemeConfig) =>
+        axiosInstance
+            .post<ThemeConfigCreateResponse>("theme", theme)
+            .then(handleResponse)
+            .catch(handleError),
 };
 
 export const ThemeKeys = {
@@ -23,7 +22,13 @@ export const ThemeKeys = {
             queryKey: ["themes"],
             queryFn: () => ThemesApi.getThemes(),
             refetchOnWindowFocus: false,
+            staleTime: 1_000 * 10,
             retry: 0, // remove
             refetchOnMount: false,
+        }),
+    create: (theme: ThemeConfig) =>
+        queryOptions({
+            queryKey: ["theme-create"],
+            queryFn: () => ThemesApi.createTheme(theme),
         }),
 };

@@ -105,7 +105,7 @@ export default function RequestScreen({
     const submitAnalysisRequest = () => {};
 
     return (
-        <div className='flex flex-1 grow flex-col max-w-3xl space-y-3 my-24'>
+        <div className='flex flex-1 grow flex-col max-w-3xl space-y-3 my-4 md:my-24'>
             <StepLayout
                 open={steps.includes(0)}
                 index={1}

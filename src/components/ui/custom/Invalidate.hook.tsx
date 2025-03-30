@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 
-export default function InvalidateQuery() {
+export default function useInvalidateQuery() {
     const qc = useQueryClient();
 
     const inv = (key: string) =>

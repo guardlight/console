@@ -22,7 +22,7 @@ function RouteComponent() {
     return (
         <div>
             <Header />
-            <div className='flex flex-1 mx-6 md:mx-40 justify-center'>
+            <div className='flex flex-1 px-4 md:px-0 justify-center'>
                 <Outlet />
             </div>
         </div>
@@ -31,7 +31,7 @@ function RouteComponent() {
 
 function Header() {
     return (
-        <div className='flex justify-between items-center p-4 mx-4 sticky top-0 backdrop-blur-sm'>
+        <div className='flex justify-between items-center p-4 mx-2 md:mx-4 sticky top-0 backdrop-blur-sm'>
             <div className='text-3xl font-bold'>Guardlight</div>
             <div className='space-x-4'>
                 {/* <Button variant='outline'>Settings</Button> */}

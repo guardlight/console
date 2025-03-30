@@ -34,3 +34,9 @@ export const handleError = (error: AxiosError) => {
         return Promise.reject({ status: HttpStatusCode.InternalServerError });
     }
 };
+
+export type GuardlightServerError = {
+    error: string;
+    code: number;
+    message: string;
+};

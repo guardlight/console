@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import DataLoaderSpinner from "@/components/ui/custom/DataLoader";
 import EmptyList from "@/components/ui/custom/EmptyList";
 import ErrorSoftner from "@/components/ui/custom/ErrorSoftner";
-import InvalidateQuery from "@/components/ui/custom/Invalidate.hook";
+import useInvalidateQuery from "@/components/ui/custom/Invalidate.hook";
 import { AnalysisKeys } from "@/domain/analysis/api";
 import { AnalysisRequestResult, AnalysisStatus } from "@/domain/analysis/type";
 import { cn } from "@/lib/utils";
@@ -20,10 +20,10 @@ export function HomeScreen({}: IHomeScreen) {
         AnalysisKeys.analyses()
     );
 
-    const { invs } = InvalidateQuery();
+    const { invs } = useInvalidateQuery();
 
     return (
-        <div className='flex flex-1 grow flex-col max-w-2xl space-y-5 mt-24'>
+        <div className='flex flex-1 grow flex-col max-w-2xl space-y-5 mt-4 md:mt-24'>
             <div className='flex justify-end gap-2'>
                 <Button
                     variant='ghost'

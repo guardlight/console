@@ -35,7 +35,7 @@ type IAnalysisScreen = {
 };
 export default function AnalysisScreen({ analysisResult }: IAnalysisScreen) {
     return (
-        <div className='flex flex-1 grow flex-col max-w-3xl space-y-3 my-24'>
+        <div className='flex flex-1 grow flex-col max-w-3xl space-y-3 my-4 md:my-24'>
             <div className='space-x-1'>
                 <span className='text-3xl font-medium'>
                     {analysisResult.title}
