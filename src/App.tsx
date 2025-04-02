@@ -2,7 +2,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { AuthProvider, useAuth } from "./components/auth/auth";
 import { Toaster } from "./components/ui/sonner";
+import { mockAnalysisApi } from "./domain/analysis/api.dev";
 import { axiosInstance } from "./domain/http/api";
+import { mockParserApi } from "./domain/parser/api.dev";
 import { mockThemesApi } from "./domain/theme/api.dev";
 import { routeTree } from "./routeTree.gen";
 
@@ -34,6 +36,8 @@ if (import.meta.env.MODE === "development") {
     const MockAdapter = (await import("axios-mock-adapter")).default;
     const mock = new MockAdapter(axiosInstance);
     mockThemesApi(mock);
+    mockParserApi(mock);
+    mockAnalysisApi(mock);
 }
 
 function App() {

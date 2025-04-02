@@ -1,40 +1,78 @@
-import { CONTENT_TYPE_NAME_MAP, ICON_MAP } from "@/components/const/const";
+import {
+    CONTENT_TYPE_NAME_MAP,
+    ICON_MAP,
+    NIL_UUID,
+} from "@/components/const/const";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import { BackLink } from "@/components/ui/custom/BackLink";
+import DataLoaderSpinner from "@/components/ui/custom/DataLoader";
+import EmptyList from "@/components/ui/custom/EmptyList";
+import ErrorSoftner from "@/components/ui/custom/ErrorSoftner";
+import useGoBack from "@/components/ui/custom/GoBack.hook";
+import useInvalidateQuery from "@/components/ui/custom/Invalidate.hook";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { AnalysisApi, AnalysisKeys } from "@/domain/analysis/api";
 import {
     AnalysisRequest,
     Analyzer,
     ContentType,
     Theme,
 } from "@/domain/analysis/type";
+import { ParserKeys } from "@/domain/parser/api";
 import { Parser } from "@/domain/parser/type";
+import { ThemeKeys } from "@/domain/theme/api";
 import { ThemeConfig } from "@/domain/theme/type";
 import { cn } from "@/lib/utils";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
-import { PropsWithChildren, ReactNode, useState } from "react";
+import { AlertCircle } from "lucide-react";
+import { PropsWithChildren, ReactNode, useMemo, useState } from "react";
 import { LuLoaderCircle } from "react-icons/lu";
+import { toast } from "sonner";
 
-type IRequestScreen = {
-    parsers: Array<Parser>;
-    themeConfigs: Array<ThemeConfig>;
-};
-export default function RequestScreen({
-    parsers,
-    themeConfigs,
-}: IRequestScreen) {
+type IRequestScreen = {};
+export default function RequestScreen({}: IRequestScreen) {
     const [ar, setAr] = useState<AnalysisRequest>({
         title: "",
         contentType: "book",
         file: {
-            content: "",
+            content: new Uint8Array(),
             mimetype: "",
         },
         themes: [],
     });
     const [steps, setSteps] = useState<Array<number>>([0]);
+
+    const { invs } = useInvalidateQuery();
+    const { back } = useGoBack();
+
+    const { mutate: requestAnalysis, isPending } = useMutation({
+        mutationFn: (request: AnalysisRequest) =>
+            AnalysisApi.requestAnalysis(request),
+        onSuccess: () => {
+            invs(AnalysisKeys.analyses().queryKey);
+            back();
+        },
+        onError: () => {
+            toast.custom(() => (
+                <Alert
+                    variant='destructive'
+                    className='bg-red-50 border-red-300'
+                >
+                    <AlertCircle className='h-4 w-4' />
+                    <AlertTitle>Saving Problem</AlertTitle>
+                    <AlertDescription>
+                        Your analysis request could not be submitted. Please try
+                        again.
+                    </AlertDescription>
+                </Alert>
+            ));
+        },
+    });
+
     const addStep = (n: number) => {
         setSteps((prevState) => [...prevState, n]);
     };
@@ -70,12 +108,13 @@ export default function RequestScreen({
     };
 
     const changeFileContent = (content: string) => {
+        const enc = new TextEncoder();
         setAr((prevState) => {
             return {
                 ...prevState,
                 file: {
                     ...prevState.file,
-                    content: content,
+                    content: enc.encode(content),
                 },
             };
         });
@@ -89,10 +128,20 @@ export default function RequestScreen({
                       ...prevState.themes,
                       {
                           ...theme,
-                          analyzers: theme.analyzers.map((a) => ({
-                              ...a,
-                              threshold: 0,
-                          })),
+                          analyzers: theme.analyzers
+                              .filter(
+                                  (a) =>
+                                      a.changeStatus === "changed" ||
+                                      a.changeStatus === "same"
+                              )
+                              .map((a) => ({
+                                  ...a,
+                                  inputs: a.inputs.filter(
+                                      (ai) =>
+                                          ai.changeStatus === "changed" ||
+                                          ai.changeStatus === "same"
+                                  ),
+                              })),
                       },
                   ];
             return {
@@ -102,7 +151,9 @@ export default function RequestScreen({
         });
     };
 
-    const submitAnalysisRequest = () => {};
+    const submitAnalysisRequest = () => {
+        requestAnalysis(ar);
+    };
 
     return (
         <div className='flex flex-1 grow flex-col max-w-3xl space-y-3 my-4 md:my-24'>
@@ -169,16 +220,7 @@ export default function RequestScreen({
                 )}
                 steps={steps}
             >
-                <div className='grid grid-cols-2 gap-3'>
-                    {parsers.map((parser) => (
-                        <AnalysisMediaType
-                            onClick={() => selectMimeType(parser.type)}
-                            key={parser.type}
-                            parser={parser}
-                            selected={ar.file.mimetype === parser.type}
-                        />
-                    ))}
-                </div>
+                <ParserSection ar={ar} selectMimeType={selectMimeType} />
             </StepLayout>
             <StepLayout
                 open={steps.includes(2)}
@@ -225,16 +267,7 @@ export default function RequestScreen({
                 )}
                 steps={steps}
             >
-                <div className='grid grid-cols-2 gap-3'>
-                    {themeConfigs.map((theme) => (
-                        <ThemeType
-                            onClick={() => toggleTheme(theme)}
-                            key={theme.id}
-                            theme={theme}
-                            selected={ar.themes.some((t) => t.id === theme.id)}
-                        />
-                    ))}
-                </div>
+                <ThemesSection ar={ar} toggleTheme={toggleTheme} />
             </StepLayout>
             <StepLayout
                 open={steps.includes(4)}
@@ -246,27 +279,7 @@ export default function RequestScreen({
                 )}
                 steps={steps}
             >
-                <div className='grid grid-cols-2 gap-3'>
-                    {Array.from(
-                        new Set(
-                            ar.themes.flatMap((t) =>
-                                t.analyzers.map((a) => a.key)
-                            )
-                        )
-                    ).map((key) => {
-                        const analyzer = ar.themes
-                            .flatMap((t) => t.analyzers)
-                            .find((a) => a.key === key);
-                        return (
-                            <AnalyzerType
-                                themes={ar.themes}
-                                key={analyzer?.key}
-                                analyzer={analyzer!}
-                                selected={true}
-                            />
-                        );
-                    })}
-                </div>
+                <AnalyzerThemesOverviewSection ar={ar} />
             </StepLayout>
             <StepLayout
                 open={steps.includes(5)}
@@ -275,7 +288,9 @@ export default function RequestScreen({
                 active={steps.includes(5)}
                 nextButton={() => (
                     <Button onClick={() => submitAnalysisRequest()}>
-                        <LuLoaderCircle className='animate-spin' />
+                        {isPending && (
+                            <LuLoaderCircle className='animate-spin' />
+                        )}
                         Submit Analysis Request
                     </Button>
                 )}
@@ -288,6 +303,119 @@ export default function RequestScreen({
                     <Button variant='cancel'>Cancel Request</Button>
                 </BackLink>
             </div>
+        </div>
+    );
+}
+
+type IAnalyzerThemesOverviewSection = {
+    ar: AnalysisRequest;
+};
+function AnalyzerThemesOverviewSection({ ar }: IAnalyzerThemesOverviewSection) {
+    const uniqueAnalyzers = useMemo(
+        () =>
+            Array.from(
+                new Set(ar.themes.flatMap((t) => t.analyzers.map((a) => a.key)))
+            ),
+        [ar.themes]
+    );
+
+    if (uniqueAnalyzers.length === 0) {
+        return (
+            <EmptyList title='Selected themes does not contain any analyzers.' />
+        );
+    }
+
+    return (
+        <div className='grid grid-cols-2 gap-3'>
+            {uniqueAnalyzers.map((key) => {
+                const analyzer = ar.themes
+                    .flatMap((t) => t.analyzers)
+                    .find((a) => a.key === key);
+                return (
+                    <AnalyzerType
+                        themes={ar.themes}
+                        key={analyzer?.key}
+                        analyzer={analyzer!}
+                        selected={true}
+                    />
+                );
+            })}
+        </div>
+    );
+}
+
+type IThemesSection = {
+    toggleTheme: (theme: ThemeConfig) => void;
+    ar: AnalysisRequest;
+};
+function ThemesSection({ toggleTheme, ar }: IThemesSection) {
+    const { data, error, isFetching } = useQuery(ThemeKeys.themes());
+
+    if (isFetching) {
+        return <DataLoaderSpinner title='Loading your themes.' />;
+    }
+
+    if (Boolean(error) || !!!data) {
+        return (
+            <ErrorSoftner
+                title="Couldn't load your themes."
+                queryKeys={ThemeKeys.themes().queryKey}
+            />
+        );
+    }
+
+    if (!data || data.filter((theme) => theme.id !== NIL_UUID).length === 0)
+        return <EmptyList title='No themes created yet.' />;
+
+    return (
+        <div className='grid grid-cols-2 gap-3'>
+            {data
+                .filter((t) => t.id !== NIL_UUID)
+                .map((theme) => (
+                    <ThemeType
+                        onClick={() => toggleTheme(theme)}
+                        key={theme.id}
+                        theme={theme}
+                        selected={ar.themes.some((t) => t.id === theme.id)}
+                    />
+                ))}
+        </div>
+    );
+}
+
+type IParsersSection = {
+    selectMimeType: (type: string) => void;
+    ar: AnalysisRequest;
+};
+function ParserSection({ selectMimeType, ar }: IParsersSection) {
+    const { data, error, isFetching } = useQuery(ParserKeys.parsers());
+
+    if (isFetching) {
+        return <DataLoaderSpinner title='Loading your parsers.' />;
+    }
+
+    if (Boolean(error) || !!!data) {
+        return (
+            <ErrorSoftner
+                title="Couldn't load your parsers."
+                queryKeys={ThemeKeys.themes().queryKey}
+            />
+        );
+    }
+
+    if (!data || data.length === 0)
+        return <EmptyList title='No parsers configured.' />;
+
+    return (
+        <div className='grid grid-cols-2 gap-3'>
+            {data.map((parser) => (
+                <AnalysisMediaType
+                    onClick={() => selectMimeType(parser.type)}
+                    key={parser.type}
+                    parser={parser}
+                    selected={ar.file.mimetype === parser.type}
+                />
+            ))}
         </div>
     );
 }
@@ -344,7 +472,7 @@ function AnalysisMediaType({
             {...props}
         >
             <CardHeader className='text-lg px-0'>{parser.name}</CardHeader>
-            <p className='text-primary opacity-50 text-sm'>
+            <p className='text-muted-foreground text-sm'>
                 {parser.description}
             </p>
         </Card>
@@ -373,9 +501,7 @@ function ThemeType({
             {...props}
         >
             <CardHeader className='text-lg px-0'>{theme.title}</CardHeader>
-            <p className='text-primary opacity-50 text-sm'>
-                {theme.description}
-            </p>
+            <p className='text-muted-foreground text-sm'>{theme.description}</p>
         </Card>
     );
 }

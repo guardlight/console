@@ -4,20 +4,26 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion";
+import DataLoaderSpinner from "@/components/ui/custom/DataLoader";
+import EmptyList from "@/components/ui/custom/EmptyList";
+import ErrorSoftner from "@/components/ui/custom/ErrorSoftner";
 import {
     HoverCard,
     HoverCardContent,
     HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import { AnalysisKeys } from "@/domain/analysis/api";
 import {
-    AnalysisRequestResult,
     AnalyzerInputResult,
     AnalyzerResult,
+    NIL_ANALYSIS_RESULT,
     ThemeResult,
 } from "@/domain/analysis/type";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
-import { useCallback } from "react";
+import { PropsWithChildren, useCallback, useMemo } from "react";
 import { LuFileInput, LuLoaderCircle } from "react-icons/lu";
 
 const StatusColorMap: Record<string, string> = {
@@ -31,11 +37,44 @@ const StatusThemeTitleMap: Record<string, string> = {
 };
 
 type IAnalysisScreen = {
-    analysisResult: AnalysisRequestResult;
+    analysisId: string;
 };
-export default function AnalysisScreen({ analysisResult }: IAnalysisScreen) {
+export default function AnalysisScreen({ analysisId }: IAnalysisScreen) {
+    const { data, isFetching, error } = useQuery(AnalysisKeys.analyses());
+
+    const analysisResult = useMemo(
+        () => data?.find((d) => d.id === analysisId) || NIL_ANALYSIS_RESULT,
+        [analysisId, data]
+    );
+
+    if (isFetching)
+        return (
+            <PageWrapper>
+                <DataLoaderSpinner title='Loading your analysis result.' />
+            </PageWrapper>
+        );
+
+    if (error)
+        return (
+            <PageWrapper>
+                <ErrorSoftner
+                    title="Couldn't load your analysis result."
+                    queryKeys={AnalysisKeys.analyses().queryKey}
+                />
+            </PageWrapper>
+        );
+
+    if (analysisResult.id === "")
+        return (
+            <PageWrapper>
+                <EmptyList title='Analysis result not found.'>
+                    <Link to='/'>Back to Dashboard.</Link>
+                </EmptyList>
+            </PageWrapper>
+        );
+
     return (
-        <div className='flex flex-1 grow flex-col max-w-3xl space-y-3 my-4 md:my-24'>
+        <PageWrapper>
             <div className='space-x-1'>
                 <span className='text-3xl font-medium'>
                     {analysisResult.title}
@@ -54,9 +93,17 @@ export default function AnalysisScreen({ analysisResult }: IAnalysisScreen) {
                 }
             >
                 {analysisResult.themes.map((t) => (
-                    <ThemeAccordion theme={t} />
+                    <ThemeAccordion key={t.id} theme={t} />
                 ))}
             </Accordion>
+        </PageWrapper>
+    );
+}
+
+function PageWrapper({ children }: PropsWithChildren) {
+    return (
+        <div className='flex flex-1 grow flex-col max-w-3xl space-y-3 my-4 md:my-24'>
+            {children}
         </div>
     );
 }
