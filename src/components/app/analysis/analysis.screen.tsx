@@ -1,3 +1,4 @@
+import { ICON_MAP } from "@/components/const/const";
 import {
     Accordion,
     AccordionContent,
@@ -24,7 +25,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
 import { PropsWithChildren, useCallback, useMemo } from "react";
-import { LuFileInput, LuLoaderCircle } from "react-icons/lu";
+import { LuLoaderCircle, LuTags } from "react-icons/lu";
 
 const StatusColorMap: Record<string, string> = {
     false: clsx(`border-emerald-500 shadow-green-100 text-emerald-700`),
@@ -73,15 +74,21 @@ export default function AnalysisScreen({ analysisId }: IAnalysisScreen) {
             </PageWrapper>
         );
 
+    const IconComponent = useMemo(
+        () => ICON_MAP[analysisResult.contentType],
+        [analysisResult]
+    );
+
     return (
         <PageWrapper>
-            <div className='space-x-1'>
+            <div className='space-x-1 flex items-baseline'>
                 <span className='text-3xl font-medium'>
                     {analysisResult.title}
                 </span>
-                <span className='text-xs text-muted-foreground font-light'>
+                <span className='text-xs text-muted-foreground font-light grow'>
                     Analysis Report
                 </span>
+                <IconComponent className='size-7' />
             </div>
             <Accordion
                 type='multiple'
@@ -217,9 +224,9 @@ function AnalysisSection({ analysis }: IAnalysisSection) {
                     <HoverCard openDelay={0}>
                         <HoverCardTrigger asChild>
                             <span className='text-muted-foreground text-sm font-extralight flex items-center gap-1 mr-1 cursor-pointer'>
-                                Inputs
-                                <LuFileInput
-                                    className='text-muted-foreground'
+                                Meta Information
+                                <LuTags
+                                    className='text-muted-foreground size-4'
                                     strokeWidth={1.25}
                                 />
                             </span>
@@ -232,6 +239,13 @@ function AnalysisSection({ analysis }: IAnalysisSection) {
                                         input={ai}
                                     />
                                 ))}
+                                <AnalysisInputItem
+                                    input={{
+                                        key: "score",
+                                        name: "Score",
+                                        value: analysis.score.toString(),
+                                    }}
+                                />
                             </div>
                         </HoverCardContent>
                     </HoverCard>

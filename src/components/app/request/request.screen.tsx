@@ -39,7 +39,7 @@ export default function RequestScreen({}: IRequestScreen) {
         title: "",
         contentType: "book",
         file: {
-            content: new Uint8Array(),
+            content: "",
             mimetype: "",
         },
         themes: [],
@@ -53,8 +53,10 @@ export default function RequestScreen({}: IRequestScreen) {
         mutationFn: (request: AnalysisRequest) =>
             AnalysisApi.requestAnalysis(request),
         onSuccess: () => {
-            invs(AnalysisKeys.analyses().queryKey);
-            back();
+            setTimeout(() => {
+                invs(AnalysisKeys.analyses().queryKey);
+                back();
+            }, 200);
         },
         onError: () => {
             toast.custom(() => (
@@ -108,13 +110,21 @@ export default function RequestScreen({}: IRequestScreen) {
     };
 
     const changeFileContent = (content: string) => {
-        const enc = new TextEncoder();
         setAr((prevState) => {
             return {
                 ...prevState,
                 file: {
                     ...prevState.file,
-                    content: enc.encode(content),
+                    content: btoa(
+                        Uint8Array.from(
+                            Array.from(content).map((letter) =>
+                                letter.charCodeAt(0)
+                            )
+                        ).reduce(
+                            (data, byte) => data + String.fromCharCode(byte),
+                            ""
+                        )
+                    ),
                 },
             };
         });
@@ -251,6 +261,7 @@ export default function RequestScreen({}: IRequestScreen) {
                         </p>
                     </div>
                 )}
+                {/* <Button onClick={setFromClipboard}>From Clipboard</Button> */}
             </StepLayout>
             <StepLayout
                 open={steps.includes(3)}

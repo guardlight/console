@@ -1,4 +1,5 @@
 import React from "react";
+import { getStoredUser, setStoredUser, sleep } from "./storage";
 
 export interface AuthContext {
     isAuthenticated: boolean;
@@ -8,20 +9,6 @@ export interface AuthContext {
 }
 
 const AuthContext = React.createContext<AuthContext | null>(null);
-
-const key = "guardlight.auth.user";
-
-function getStoredUser() {
-    return localStorage.getItem(key);
-}
-
-function setStoredUser(user: string | null) {
-    if (user) {
-        localStorage.setItem(key, user);
-    } else {
-        localStorage.removeItem(key);
-    }
-}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = React.useState<string | null>(getStoredUser());
@@ -50,10 +37,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             {children}
         </AuthContext.Provider>
     );
-}
-
-export async function sleep(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export function useAuth() {

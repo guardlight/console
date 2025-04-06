@@ -183,12 +183,12 @@ export default function ThemeScreen({ themeConfigId }: IThemeScreen) {
                     )}
 
                     <Textarea
-                        placeholder='Enter theme description (Optional)'
+                        placeholder='Enter theme description. (Optional)'
                         value={localTheme.description}
                         onChange={(e) => updateThemeDescription(e.target.value)}
                     />
                     <span className='text-sm text-muted-foreground ml-3'>
-                        This name will be displayed when creating a Analysis
+                        This name will be displayed when creating an Analysis
                         Request
                     </span>
                 </div>

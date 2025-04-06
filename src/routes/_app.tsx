@@ -1,7 +1,10 @@
+import { setStoredUser } from "@/components/auth/storage";
+import { EVENT_AUTHENTICATION_LOGOUT } from "@/components/const/const";
 import { ParserKeys } from "@/domain/parser/api";
 import { ThemeKeys } from "@/domain/theme/api";
 import { usePrefetchQuery } from "@tanstack/react-query";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/_app")({
     beforeLoad: ({ context }) => {
@@ -15,6 +18,22 @@ export const Route = createFileRoute("/_app")({
 });
 
 function RouteComponent() {
+    useEffect(() => {
+        const navigateToLogin = () => {
+            setStoredUser(null);
+            window.location.reload();
+        };
+
+        window.addEventListener(EVENT_AUTHENTICATION_LOGOUT, navigateToLogin);
+
+        return () => {
+            window.removeEventListener(
+                EVENT_AUTHENTICATION_LOGOUT,
+                navigateToLogin
+            );
+        };
+    }, []);
+
     usePrefetchQuery(ThemeKeys.themes());
     usePrefetchQuery(ParserKeys.parsers());
 

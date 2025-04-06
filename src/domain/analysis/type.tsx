@@ -11,7 +11,7 @@ export type AnalysisRequest = {
 };
 
 export type File = {
-    content: Uint8Array;
+    content: string;
     mimetype: string;
 };
 

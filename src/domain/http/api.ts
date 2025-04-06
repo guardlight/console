@@ -1,3 +1,4 @@
+import { EVENT_AUTHENTICATION_LOGOUT } from "@/components/const/const";
 import axios, { AxiosError, AxiosResponse, HttpStatusCode } from "axios";
 
 export const axiosInstance = axios.create({
@@ -11,12 +12,15 @@ export const handleResponse = <T extends unknown>(
     return Promise.resolve(response.data);
 };
 
-export type OrbitError = {
+export type GuardlightError = {
     status: HttpStatusCode;
 };
 export const handleError = (error: AxiosError) => {
     if (axios.isAxiosError(error)) {
         if (error.response) {
+            if (error.response.status === 401) {
+                window.dispatchEvent(new Event(EVENT_AUTHENTICATION_LOGOUT));
+            }
             // Server responded with a status other than 2xx
             return Promise.reject({ status: error.response.status }); // Return the status code
         } else if (error.request) {

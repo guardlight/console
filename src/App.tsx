@@ -3,6 +3,7 @@ import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { AuthProvider, useAuth } from "./components/auth/auth";
 import { Toaster } from "./components/ui/sonner";
 import { mockAnalysisApi } from "./domain/analysis/api.dev";
+import { mockAuthApi } from "./domain/auth/api.dev";
 import { axiosInstance } from "./domain/http/api";
 import { mockParserApi } from "./domain/parser/api.dev";
 import { mockThemesApi } from "./domain/theme/api.dev";
@@ -32,12 +33,13 @@ function InnerApp() {
 const queryClient = new QueryClient();
 
 if (import.meta.env.MODE === "development") {
-    console.log("setup mock");
+    console.log("Development Mode");
     const MockAdapter = (await import("axios-mock-adapter")).default;
     const mock = new MockAdapter(axiosInstance);
     mockThemesApi(mock);
     mockParserApi(mock);
     mockAnalysisApi(mock);
+    mockAuthApi(mock);
 }
 
 function App() {
