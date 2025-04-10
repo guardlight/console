@@ -29,7 +29,16 @@ import { cn } from "@/lib/utils";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import { AlertCircle } from "lucide-react";
-import { PropsWithChildren, ReactNode, useMemo, useState } from "react";
+import {
+    Dispatch,
+    PropsWithChildren,
+    ReactNode,
+    SetStateAction,
+    useCallback,
+    useMemo,
+    useState,
+} from "react";
+import { DropzoneOptions, useDropzone } from "react-dropzone";
 import { LuLoaderCircle } from "react-icons/lu";
 import { toast } from "sonner";
 
@@ -255,11 +264,7 @@ export default function RequestScreen({}: IRequestScreen) {
                     />
                 )}
                 {ar.file.mimetype !== "freetext" && (
-                    <div className='border border-slate-200 rounded-2xl p-8 text-center justify-center'>
-                        <p className='text-slate-400'>
-                            Drag file here to upload
-                        </p>
-                    </div>
+                    <DragAndDrop setAr={setAr} />
                 )}
                 {/* <Button onClick={setFromClipboard}>From Clipboard</Button> */}
             </StepLayout>
@@ -314,6 +319,87 @@ export default function RequestScreen({}: IRequestScreen) {
                     <Button variant='cancel'>Cancel Request</Button>
                 </BackLink>
             </div>
+        </div>
+    );
+}
+
+type IDragAndDrop = {
+    setAr: Dispatch<SetStateAction<AnalysisRequest>>;
+};
+function DragAndDrop({ setAr }: IDragAndDrop) {
+    const [selectedFile, setSelectedFile] = useState<globalThis.File | null>(
+        null
+    );
+
+    const onDropAccepted: DropzoneOptions["onDropAccepted"] = useCallback(
+        (files: globalThis.File[]) => {
+            const file = files[0];
+
+            if (!file) {
+                return;
+            }
+
+            setSelectedFile(file);
+
+            console.table(file);
+            const reader = new FileReader();
+
+            reader.onload = () => {
+                const arrayBuffer = reader.result as ArrayBuffer;
+                const byteArr = new Uint8Array(arrayBuffer);
+                const base64EncodedFile = btoa(
+                    byteArr.reduce(
+                        (data, byte) => data + String.fromCharCode(byte),
+                        ""
+                    )
+                );
+                setAr((prevState) => {
+                    return {
+                        ...prevState,
+                        file: {
+                            ...prevState.file,
+                            content: base64EncodedFile,
+                        },
+                    };
+                });
+            };
+
+            reader.readAsArrayBuffer(file);
+        },
+        []
+    );
+
+    const { getRootProps, getInputProps, isDragActive, isDragAccept } =
+        useDropzone({
+            onDropAccepted,
+            maxFiles: 1,
+            accept: {
+                "application/epub+zip": [],
+            },
+        });
+
+    return (
+        <div
+            className='border border-slate-200 rounded-2xl p-8 text-center justify-center cursor-pointer'
+            {...getRootProps()}
+        >
+            <div>
+                <input {...getInputProps()} />
+                {isDragActive ? (
+                    isDragAccept ? (
+                        <p className='text-muted-foreground'>
+                            Drop the files here ...
+                        </p>
+                    ) : (
+                        <p className='text-red-500'>Filetype not supported</p>
+                    )
+                ) : (
+                    <p className='text-muted-foreground'>
+                        Drag 'n drop some files here, or click to select files
+                    </p>
+                )}
+            </div>
+            {selectedFile && <p className='my-1'>{selectedFile.name}</p>}
         </div>
     );
 }
