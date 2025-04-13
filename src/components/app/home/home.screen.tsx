@@ -90,7 +90,7 @@ function AnalysesLoading({ isFetching, analyses, error }: IAnalysesLoading) {
 const statusMap: Record<AnalysisStatus, ReactNode> = {
     waiting: <p>Waiting</p>,
     error: <p className='text-red-400'>Error</p>,
-    inprogress: <p className='animate-pulse'>In Progress</p>,
+    inprogress: <p>In Progress</p>,
     finished: <p>Finished</p>,
 };
 
@@ -150,8 +150,16 @@ function AnalysisItem({ analysisRequest }: IAnalysis) {
         return borderColorMap["neutral"];
     }, [analysisRequest]);
 
-    const isProcessing =
-        statusComputed() === "inprogress" || statusComputed() === "waiting";
+    const percentageCompleted = useCallback(() => {
+        const allStatus = analysisRequest.themes.flatMap((t) =>
+            t.analyzers.flatMap((a) => a.jobs.flatMap((j) => j.status))
+        );
+        const done = allStatus.filter((status) => status === "finished").length;
+        return Math.round((done / allStatus.length) * 100) || 0;
+    }, [analysisRequest]);
+
+    const isInProgress = statusComputed() === "inprogress";
+    const isProcessing = isInProgress || statusComputed() === "waiting";
 
     return (
         <Link
@@ -177,7 +185,14 @@ function AnalysisItem({ analysisRequest }: IAnalysis) {
                         </div>
                     </div>
                     <div className='flex items-center space-x-8'>
-                        {status()}
+                        {isInProgress ? (
+                            <div className='animate-pulse'>
+                                {percentageCompleted()}%
+                            </div>
+                        ) : (
+                            <div>{status()}</div>
+                        )}
+
                         <LuArrowRight className='size-6' strokeWidth={1.5} />
                     </div>
                 </Card>
