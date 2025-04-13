@@ -76,7 +76,7 @@ export default function LoginScreen() {
     });
 
     return (
-        <div className='bg-[url(../../src/assets/images/books.jpg)] h-full'>
+        <div className='bg-[url(/src/assets/images/books.jpg)] h-full'>
             <div className='backdrop-blur-lg h-full'>
                 <div className='mx-6 md:mx-40 flex-1 flex justify-center pt-48 '>
                     <div className='max-w-full grow md:max-w-xl md:min-w-xl'>
