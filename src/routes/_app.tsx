@@ -1,5 +1,7 @@
 import { setStoredUser } from "@/components/auth/storage";
 import { EVENT_AUTHENTICATION_LOGOUT } from "@/components/const/const";
+import useInvalidateQuery from "@/components/ui/custom/Invalidate.hook";
+import { AnalysisKeys } from "@/domain/analysis/api";
 import { ParserKeys } from "@/domain/parser/api";
 import { ThemeKeys } from "@/domain/theme/api";
 import { usePrefetchQuery } from "@tanstack/react-query";
@@ -17,7 +19,15 @@ export const Route = createFileRoute("/_app")({
     component: RouteComponent,
 });
 
+type Event = {
+    type: "update" | "heartbeat";
+    action: "analysis_done" | "beat";
+    data: string;
+};
+
 function RouteComponent() {
+    const { invs } = useInvalidateQuery();
+
     useEffect(() => {
         const navigateToLogin = () => {
             setStoredUser(null);
@@ -33,6 +43,33 @@ function RouteComponent() {
             );
         };
     }, []);
+
+    useEffect(() => {
+        const baseUrl = import.meta.env.VITE_SERVER_URL;
+
+        const es = new EventSource(baseUrl + "/events", {
+            withCredentials: true,
+        });
+
+        es.onopen = () => console.log(">>> Connection opened!");
+
+        es.onerror = (e) => console.log("ERROR!", e);
+
+        es.onmessage = (e) => handleMessage(e);
+
+        return () => es.close();
+    }, []);
+
+    const handleMessage = (e: MessageEvent<any>) => {
+        if (e.data) {
+            const ev: Event = JSON.parse(e.data);
+            if ("update" === ev.type) {
+                if ("analysis_done" === ev.action) {
+                    invs(AnalysisKeys.analyses().queryKey);
+                }
+            }
+        }
+    };
 
     usePrefetchQuery(ThemeKeys.themes());
     usePrefetchQuery(ParserKeys.parsers());

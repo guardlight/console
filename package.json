@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port 4000 --host",
-    "dev-prod": "vite --port 4000 --host --mode production",
+    "staging": "vite --port 4000 --host --mode staging",
     "build": "tsc -b && vite build --mode production",
     "lint": "eslint .",
     "preview": "vite preview"
