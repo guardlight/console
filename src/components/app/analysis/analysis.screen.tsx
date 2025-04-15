@@ -33,8 +33,8 @@ const StatusColorMap: Record<string, string> = {
 };
 
 const StatusThemeTitleMap: Record<string, string> = {
-    false: "Theme approved",
-    true: "Theme not approved",
+    false: "Theme not flagged",
+    true: "Theme flagged",
 };
 
 type IAnalysisScreen = {
@@ -162,7 +162,7 @@ function ThemeAccordion({ theme }: IThemeAccordion) {
                 </AccordionTrigger>
                 <AccordionContent className='space-y-4'>
                     {theme.analyzers.map((a) => (
-                        <AnalysisSection analysis={a} />
+                        <AnalysisSection key={a.key} analysis={a} />
                     ))}
                 </AccordionContent>
             </AccordionItem>
@@ -181,8 +181,8 @@ const contentBorderColorMap: Record<string, string> = {
 };
 
 const StatusAnalysisMap: Record<string, string> = {
-    false: "Approved",
-    true: "Not approved",
+    false: "Threshold not met.",
+    true: "Threshold met for content.",
 };
 
 type IAnalysisSection = {
@@ -268,8 +268,9 @@ function AnalysisSection({ analysis }: IAnalysisSection) {
                             No in-depth feedback provided by analyzer.
                         </p>
                     )}
-                    {analysis.content.map((c) => (
+                    {analysis.content.map((c, index) => (
                         <p
+                            key={index}
                             className={cn(
                                 "border-l-2 font-light pl-1.5 py-0.5 ml-2",
                                 contentBorderColor

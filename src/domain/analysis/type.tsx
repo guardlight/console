@@ -40,6 +40,7 @@ export type AnalysisRequestResult = {
     title: string;
     contentType: ContentType;
     themes: Array<ThemeResult>;
+    createdAt: Date;
 };
 
 export type ThemeResult = {
@@ -73,4 +74,17 @@ export const NIL_ANALYSIS_RESULT: AnalysisRequestResult = {
     title: "",
     contentType: "book",
     themes: [],
+    createdAt: new Date(),
+};
+
+// Analysis Results Basic
+
+export type AnalysisRequestResultBasic = {
+    id: string;
+    title: string;
+    contentType: ContentType;
+    overThreshold: boolean;
+    status: AnalysisStatus;
+    percentageCompleted: number;
+    createdAt: Date;
 };

@@ -21,7 +21,7 @@ export const Route = createFileRoute("/_app")({
 
 type Event = {
     type: "update" | "heartbeat";
-    action: "analysis_done" | "beat";
+    action: "analysis_done" | "analysis_requested" | "beat";
     data: string;
 };
 
@@ -64,7 +64,10 @@ function RouteComponent() {
         if (e.data) {
             const ev: Event = JSON.parse(e.data);
             if ("update" === ev.type) {
-                if ("analysis_done" === ev.action) {
+                if (
+                    "analysis_done" === ev.action ||
+                    "analysis_requested" === ev.action
+                ) {
                     invs(AnalysisKeys.analyses().queryKey);
                 }
             }

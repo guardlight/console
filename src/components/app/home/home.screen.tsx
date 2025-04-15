@@ -6,7 +6,12 @@ import EmptyList from "@/components/ui/custom/EmptyList";
 import ErrorSoftner from "@/components/ui/custom/ErrorSoftner";
 import useInvalidateQuery from "@/components/ui/custom/Invalidate.hook";
 import { AnalysisKeys } from "@/domain/analysis/api";
-import { AnalysisRequestResult, AnalysisStatus } from "@/domain/analysis/type";
+import { mapToBasic } from "@/domain/analysis/state";
+import {
+    AnalysisRequestResult,
+    AnalysisRequestResultBasic,
+    AnalysisStatus,
+} from "@/domain/analysis/type";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
@@ -16,7 +21,7 @@ import { LuArrowRight, LuRefreshCw } from "react-icons/lu";
 
 type IHomeScreen = {};
 export function HomeScreen({}: IHomeScreen) {
-    const { data, isFetching, isRefetching, error } = useQuery(
+    const { data, isLoading, isRefetching, error } = useQuery(
         AnalysisKeys.analyses()
     );
 
@@ -46,7 +51,7 @@ export function HomeScreen({}: IHomeScreen) {
             </div>
             <div className='flex flex-1 flex-col space-y-3'>
                 <AnalysesLoading
-                    isFetching={isFetching}
+                    isFetching={isLoading}
                     analyses={data}
                     error={error}
                 />
@@ -82,9 +87,16 @@ function AnalysesLoading({ isFetching, analyses, error }: IAnalysesLoading) {
             </EmptyList>
         );
 
-    return analyses.map((analysis) => (
-        <AnalysisItem key={analysis.id} analysisRequest={analysis} />
-    ));
+    return analyses
+        .map((ar) => mapToBasic(ar))
+        .sort(
+            (a, b) =>
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime()
+        )
+        .map((analysis) => (
+            <AnalysisItem key={analysis.id} analysisRequest={analysis} />
+        ));
 }
 
 const statusMap: Record<AnalysisStatus, ReactNode> = {
@@ -101,28 +113,11 @@ const borderColorMap: Record<"good" | "bad" | "neutral", string> = {
 };
 
 type IAnalysis = {
-    analysisRequest: AnalysisRequestResult;
+    analysisRequest: AnalysisRequestResultBasic;
 };
 function AnalysisItem({ analysisRequest }: IAnalysis) {
-    const statusComputed = useCallback((): AnalysisStatus => {
-        const statuses = analysisRequest.themes
-            .flatMap((t) => t.analyzers)
-            .map((a) => a.status);
-        if (statuses.includes("error")) {
-            return "error";
-        } else if (statuses.every((status) => status === "waiting")) {
-            return "waiting";
-        } else if (statuses.includes("inprogress")) {
-            return "inprogress";
-        } else if (statuses.every((status) => status === "finished")) {
-            return "finished";
-        } else {
-            return "waiting";
-        }
-    }, [analysisRequest]);
-
     const status = useCallback((): ReactNode => {
-        return statusMap[statusComputed()];
+        return statusMap[analysisRequest.status];
     }, [analysisRequest]);
 
     const icon = useCallback(() => {
@@ -131,18 +126,8 @@ function AnalysisItem({ analysisRequest }: IAnalysis) {
     }, [analysisRequest]);
 
     const borderColor = useCallback((): string => {
-        if (statusComputed() == "finished") {
-            const overThreshold = analysisRequest.themes
-                .flatMap((t) => t.analyzers)
-                .some(
-                    (a) =>
-                        a.score >
-                        +(
-                            a.inputs.find((i) => i.key === "threshold")
-                                ?.value || "0"
-                        )
-                );
-            if (overThreshold) {
+        if (analysisRequest.status == "finished") {
+            if (analysisRequest.overThreshold) {
                 return borderColorMap["bad"];
             }
             return borderColorMap["good"];
@@ -150,16 +135,8 @@ function AnalysisItem({ analysisRequest }: IAnalysis) {
         return borderColorMap["neutral"];
     }, [analysisRequest]);
 
-    const percentageCompleted = useCallback(() => {
-        const allStatus = analysisRequest.themes.flatMap((t) =>
-            t.analyzers.flatMap((a) => a.jobs.flatMap((j) => j.status))
-        );
-        const done = allStatus.filter((status) => status === "finished").length;
-        return Math.round((done / allStatus.length) * 100) || 0;
-    }, [analysisRequest]);
-
-    const isInProgress = statusComputed() === "inprogress";
-    const isProcessing = isInProgress || statusComputed() === "waiting";
+    const isInProgress = analysisRequest.status === "inprogress";
+    const isProcessing = isInProgress || analysisRequest.status === "waiting";
 
     return (
         <Link
@@ -187,7 +164,7 @@ function AnalysisItem({ analysisRequest }: IAnalysis) {
                     <div className='flex items-center space-x-8'>
                         {isInProgress ? (
                             <div className='animate-pulse'>
-                                {percentageCompleted()}%
+                                {analysisRequest.percentageCompleted}%
                             </div>
                         ) : (
                             <div>{status()}</div>
