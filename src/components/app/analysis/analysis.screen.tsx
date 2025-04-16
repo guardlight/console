@@ -17,14 +17,13 @@ import { AnalysisKeys } from "@/domain/analysis/api";
 import {
     AnalyzerInputResult,
     AnalyzerResult,
-    NIL_ANALYSIS_RESULT,
     ThemeResult,
 } from "@/domain/analysis/type";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
-import { PropsWithChildren, useCallback, useMemo } from "react";
+import { PropsWithChildren, useCallback } from "react";
 import { LuLoaderCircle, LuTags } from "react-icons/lu";
 
 const StatusColorMap: Record<string, string> = {
@@ -41,12 +40,11 @@ type IAnalysisScreen = {
     analysisId: string;
 };
 export default function AnalysisScreen({ analysisId }: IAnalysisScreen) {
-    const { data, isFetching, error } = useQuery(AnalysisKeys.analyses());
-
-    const analysisResult = useMemo(
-        () => data?.find((d) => d.id === analysisId) || NIL_ANALYSIS_RESULT,
-        [analysisId, data]
-    );
+    const {
+        data: analysisResult,
+        isFetching,
+        error,
+    } = useQuery(AnalysisKeys.analysisById(analysisId));
 
     if (isFetching)
         return (
@@ -60,12 +58,12 @@ export default function AnalysisScreen({ analysisId }: IAnalysisScreen) {
             <PageWrapper>
                 <ErrorSoftner
                     title="Couldn't load your analysis result."
-                    queryKeys={AnalysisKeys.analyses().queryKey}
+                    queryKeys={AnalysisKeys.analysisById(analysisId).queryKey}
                 />
             </PageWrapper>
         );
 
-    if (analysisResult.id === "")
+    if (!!!analysisResult) {
         return (
             <PageWrapper>
                 <EmptyList title='Analysis result not found.'>
@@ -73,11 +71,9 @@ export default function AnalysisScreen({ analysisId }: IAnalysisScreen) {
                 </EmptyList>
             </PageWrapper>
         );
+    }
 
-    const IconComponent = useMemo(
-        () => ICON_MAP[analysisResult.contentType],
-        [analysisResult]
-    );
+    const IconComponent = ICON_MAP[analysisResult.contentType];
 
     return (
         <PageWrapper>

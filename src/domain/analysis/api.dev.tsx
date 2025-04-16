@@ -41,6 +41,36 @@ export const mockAnalysisApi = (mock: MockAdapter) => {
             }, 1000);
         });
     });
+    mock.onGet(route("/analysis/:id")).reply(async (_) => {
+        return new Promise((resolve, _) => {
+            setTimeout(function () {
+                const random = Math.random();
+                if (random < 1 / 3) {
+                    resolve([200, ANALYSES[0]]);
+                } else if (random < 2 / 3) {
+                    resolve([
+                        200,
+                        {
+                            analyses: [],
+                            limit: 6,
+                            page: 0,
+                            totalPages: 1,
+                        } as AnalysisRequestResultPaginated,
+                    ]);
+                } else {
+                    resolve([
+                        500,
+                        {
+                            analyses: [],
+                            limit: 6,
+                            page: 0,
+                            totalPages: 1,
+                        } as AnalysisRequestResultPaginated,
+                    ]);
+                }
+            }, 1000);
+        });
+    });
     mock.onPost("/analysis").reply(async (_) => {
         return new Promise((resolve, _) => {
             setTimeout(function () {
@@ -61,6 +91,12 @@ export const mockAnalysisApi = (mock: MockAdapter) => {
         });
     });
 };
+
+function route(path = "") {
+    return typeof path === "string"
+        ? new RegExp(path.replace(/:\w+/g, "[^/]+"))
+        : path;
+}
 
 export const ANALYSES: Array<AnalysisRequestResult> = [
     {

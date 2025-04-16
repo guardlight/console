@@ -11,10 +11,9 @@ import DataLoaderSpinner from "@/components/ui/custom/DataLoader";
 import EmptyList from "@/components/ui/custom/EmptyList";
 import ErrorSoftner from "@/components/ui/custom/ErrorSoftner";
 import useGoBack from "@/components/ui/custom/GoBack.hook";
-import useInvalidateQuery from "@/components/ui/custom/Invalidate.hook";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { AnalysisApi, AnalysisKeys } from "@/domain/analysis/api";
+import { AnalysisApi } from "@/domain/analysis/api";
 import {
     AnalysisRequest,
     Analyzer,
@@ -55,7 +54,6 @@ export default function RequestScreen({}: IRequestScreen) {
     });
     const [steps, setSteps] = useState<Array<number>>([0]);
 
-    const { invs } = useInvalidateQuery();
     const { back } = useGoBack();
 
     const { mutate: requestAnalysis, isPending } = useMutation({
@@ -63,7 +61,7 @@ export default function RequestScreen({}: IRequestScreen) {
             AnalysisApi.requestAnalysis(request),
         onSuccess: () => {
             setTimeout(() => {
-                invs(AnalysisKeys.analyses().queryKey);
+                toast.success("Analysis Request Submitted");
                 back();
             }, 200);
         },

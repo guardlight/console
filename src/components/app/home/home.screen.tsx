@@ -86,11 +86,6 @@ function AnalysesLoading({}: IAnalysesLoading) {
             <div className='flex flex-1 flex-col space-y-3'>
                 {data.analyses
                     .map((ar) => mapToBasic(ar))
-                    .sort(
-                        (a, b) =>
-                            new Date(b.createdAt).getTime() -
-                            new Date(a.createdAt).getTime()
-                    )
                     .map((analysis) => (
                         <AnalysisItem
                             key={analysis.id}
@@ -102,7 +97,7 @@ function AnalysesLoading({}: IAnalysesLoading) {
                 <PaginationContent>
                     <PaginationItem>
                         <PaginationPrevious
-                            onClick={() => (page > 0 ? setPage(page - 1) : {})}
+                            onClick={() => (page > 1 ? setPage(page - 1) : {})}
                         />
                     </PaginationItem>
                     {Array.from(

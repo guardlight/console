@@ -14,6 +14,11 @@ export const AnalysisApi = {
             )
             .then(handleResponse)
             .catch(handleError),
+    getAnalysisById: (id: string) =>
+        axiosInstance
+            .get<AnalysisRequestResult>(`/analysis/${id}`)
+            .then(handleResponse)
+            .catch(handleError),
     requestAnalysis: (ar: AnalysisRequest) =>
         axiosInstance
             .post<Array<AnalysisRequestResult>>("/analysis", ar)
@@ -31,5 +36,14 @@ export const AnalysisKeys = {
             refetchOnMount: false,
             staleTime: 30 * 1_000,
             placeholderData: keepPreviousData,
+        }),
+    analysisById: (id: string) =>
+        queryOptions({
+            queryKey: ["analysis", id],
+            queryFn: () => AnalysisApi.getAnalysisById(id),
+            refetchOnWindowFocus: false,
+            retry: 0, // remove
+            refetchOnMount: false,
+            staleTime: 30 * 1_000,
         }),
 };

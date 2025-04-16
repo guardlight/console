@@ -1,3 +1,4 @@
+import SomethingBrokeScreen from "@/components/app/Broke.screen";
 import { setStoredUser } from "@/components/auth/storage";
 import { EVENT_AUTHENTICATION_LOGOUT } from "@/components/const/const";
 import useInvalidateQuery from "@/components/ui/custom/Invalidate.hook";
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/_app")({
         }
     },
     component: RouteComponent,
+    errorComponent: (e) => <SomethingBrokeScreen error={e} />,
 });
 
 type Event = {
