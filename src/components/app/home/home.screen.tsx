@@ -4,11 +4,17 @@ import { Card } from "@/components/ui/card";
 import DataLoaderSpinner from "@/components/ui/custom/DataLoader";
 import EmptyList from "@/components/ui/custom/EmptyList";
 import ErrorSoftner from "@/components/ui/custom/ErrorSoftner";
-import useInvalidateQuery from "@/components/ui/custom/Invalidate.hook";
+import {
+    Pagination,
+    PaginationContent,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from "@/components/ui/pagination";
 import { AnalysisKeys } from "@/domain/analysis/api";
 import { mapToBasic } from "@/domain/analysis/state";
 import {
-    AnalysisRequestResult,
     AnalysisRequestResultBasic,
     AnalysisStatus,
 } from "@/domain/analysis/type";
@@ -16,21 +22,15 @@ import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
-import { ReactNode, useCallback } from "react";
-import { LuArrowRight, LuRefreshCw } from "react-icons/lu";
+import { ReactNode, useCallback, useState } from "react";
+import { LuArrowRight } from "react-icons/lu";
 
 type IHomeScreen = {};
 export function HomeScreen({}: IHomeScreen) {
-    const { data, isLoading, isRefetching, error } = useQuery(
-        AnalysisKeys.analyses()
-    );
-
-    const { invs } = useInvalidateQuery();
-
     return (
         <div className='flex flex-1 grow flex-col max-w-2xl space-y-5 mt-4 md:mt-24'>
             <div className='flex justify-end gap-2'>
-                <Button
+                {/* <Button
                     variant='ghost'
                     className='text-muted-foreground'
                     onClick={() => invs(AnalysisKeys.analyses().queryKey)}
@@ -40,7 +40,7 @@ export function HomeScreen({}: IHomeScreen) {
                         className={isRefetching ? "animate-spin" : ""}
                     />
                     Refresh
-                </Button>
+                </Button> */}
                 <div className='grow' />
                 <Link to='/theme'>
                     <Button variant='outline'>Theme Configuration</Button>
@@ -49,34 +49,28 @@ export function HomeScreen({}: IHomeScreen) {
                     <Button>Request Analysis</Button>
                 </Link>
             </div>
-            <div className='flex flex-1 flex-col space-y-3'>
-                <AnalysesLoading
-                    isFetching={isLoading}
-                    analyses={data}
-                    error={error}
-                />
-            </div>
+            <AnalysesLoading />
         </div>
     );
 }
 
-type IAnalysesLoading = {
-    error: Error | null;
-    isFetching: boolean;
-    analyses?: Array<AnalysisRequestResult>;
-};
-function AnalysesLoading({ isFetching, analyses, error }: IAnalysesLoading) {
-    if (isFetching) return <DataLoaderSpinner title='Loading your analyses.' />;
+type IAnalysesLoading = {};
+function AnalysesLoading({}: IAnalysesLoading) {
+    const [page, setPage] = useState(1);
+
+    const { data, isLoading, error } = useQuery(AnalysisKeys.analyses(page));
+
+    if (isLoading) return <DataLoaderSpinner title='Loading your analyses.' />;
 
     if (error)
         return (
             <ErrorSoftner
                 title="Couldn't load your analyses."
-                queryKeys={AnalysisKeys.analyses().queryKey}
+                queryKeys={AnalysisKeys.analyses(1).queryKey}
             />
         );
 
-    if (!analyses || analyses.length === 0)
+    if (!data || data.analyses.length === 0)
         return (
             <EmptyList title='No analyses done yet.'>
                 <p>
@@ -87,16 +81,54 @@ function AnalysesLoading({ isFetching, analyses, error }: IAnalysesLoading) {
             </EmptyList>
         );
 
-    return analyses
-        .map((ar) => mapToBasic(ar))
-        .sort(
-            (a, b) =>
-                new Date(b.createdAt).getTime() -
-                new Date(a.createdAt).getTime()
-        )
-        .map((analysis) => (
-            <AnalysisItem key={analysis.id} analysisRequest={analysis} />
-        ));
+    return (
+        <div className='space-y-4'>
+            <div className='flex flex-1 flex-col space-y-3'>
+                {data.analyses
+                    .map((ar) => mapToBasic(ar))
+                    .sort(
+                        (a, b) =>
+                            new Date(b.createdAt).getTime() -
+                            new Date(a.createdAt).getTime()
+                    )
+                    .map((analysis) => (
+                        <AnalysisItem
+                            key={analysis.id}
+                            analysisRequest={analysis}
+                        />
+                    ))}
+            </div>
+            <Pagination>
+                <PaginationContent>
+                    <PaginationItem>
+                        <PaginationPrevious
+                            onClick={() => (page > 0 ? setPage(page - 1) : {})}
+                        />
+                    </PaginationItem>
+                    {Array.from(
+                        { length: data.totalPages || 0 },
+                        (_, index) => (
+                            <PaginationItem key={index}>
+                                <PaginationLink
+                                    onClick={() => setPage(index + 1)}
+                                    isActive={index + 1 === page}
+                                >
+                                    {index + 1}
+                                </PaginationLink>
+                            </PaginationItem>
+                        )
+                    )}
+                    <PaginationItem>
+                        <PaginationNext
+                            onClick={() =>
+                                page < data.totalPages ? setPage(page + 1) : {}
+                            }
+                        />
+                    </PaginationItem>
+                </PaginationContent>
+            </Pagination>
+        </div>
+    );
 }
 
 const statusMap: Record<AnalysisStatus, ReactNode> = {

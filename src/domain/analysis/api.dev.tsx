@@ -1,6 +1,6 @@
 import MockAdapter from "axios-mock-adapter";
 import { GuardlightServerError } from "../http/api";
-import { AnalysisRequestResult } from "./type";
+import { AnalysisRequestResult, AnalysisRequestResultPaginated } from "./type";
 
 export const mockAnalysisApi = (mock: MockAdapter) => {
     mock.onGet("/analysis").reply(async (_) => {
@@ -8,11 +8,35 @@ export const mockAnalysisApi = (mock: MockAdapter) => {
             setTimeout(function () {
                 const random = Math.random();
                 if (random < 1 / 3) {
-                    resolve([200, ANALYSES]);
+                    resolve([
+                        200,
+                        {
+                            analyses: ANALYSES,
+                            limit: 6,
+                            page: 1,
+                            totalPages: 1,
+                        } as AnalysisRequestResultPaginated,
+                    ]);
                 } else if (random < 2 / 3) {
-                    resolve([200, []]);
+                    resolve([
+                        200,
+                        {
+                            analyses: [],
+                            limit: 6,
+                            page: 0,
+                            totalPages: 1,
+                        } as AnalysisRequestResultPaginated,
+                    ]);
                 } else {
-                    resolve([500, []]);
+                    resolve([
+                        500,
+                        {
+                            analyses: [],
+                            limit: 6,
+                            page: 0,
+                            totalPages: 1,
+                        } as AnalysisRequestResultPaginated,
+                    ]);
                 }
             }, 1000);
         });

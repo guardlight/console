@@ -4,7 +4,7 @@ import EmptyList from "./EmptyList";
 
 type IErrorSoftner = {
     title: string;
-    queryKeys: Array<String>;
+    queryKeys: Array<String | number>;
 };
 export default function ErrorSoftner({ title, queryKeys }: IErrorSoftner) {
     const qc = useQueryClient();

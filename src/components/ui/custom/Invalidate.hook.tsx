@@ -8,7 +8,7 @@ export default function useInvalidateQuery() {
             queryKey: [key],
         });
 
-    const invs = (keys: Array<string>) =>
+    const invs = (keys: Array<string | number>) =>
         qc.invalidateQueries({
             queryKey: keys,
         });

@@ -35,6 +35,13 @@ export type AnalyzerInput = {
 
 // Analysis Results
 
+export type AnalysisRequestResultPaginated = {
+    limit: number;
+    page: number;
+    totalPages: number;
+    analyses: Array<AnalysisRequestResult>;
+};
+
 export type AnalysisRequestResult = {
     id: string;
     title: string;
