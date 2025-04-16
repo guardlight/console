@@ -62,7 +62,7 @@ function RouteComponent() {
 
         es.onopen = () => setServerDisconnected(false);
 
-        es.onerror = (e) => {
+        es.onerror = () => {
             setServerDisconnected(true);
         };
 
