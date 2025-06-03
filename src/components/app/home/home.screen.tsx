@@ -18,6 +18,7 @@ import {
     AnalysisRequestResultBasic,
     AnalysisStatus,
 } from "@/domain/analysis/type";
+import { useMediaQuery } from "@/lib/hooks/useMediaQuery.hook";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
@@ -29,7 +30,7 @@ type IHomeScreen = {};
 export function HomeScreen({}: IHomeScreen) {
     return (
         <div className='flex flex-1 grow flex-col max-w-2xl space-y-5 mt-4 md:mt-24'>
-            <div className='flex justify-end gap-2'>
+            <div className='md:flex md:justify-end gap-2'>
                 {/* <Button
                     variant='ghost'
                     className='text-muted-foreground'
@@ -41,13 +42,17 @@ export function HomeScreen({}: IHomeScreen) {
                     />
                     Refresh
                 </Button> */}
-                <div className='grow' />
-                <Link to='/theme'>
-                    <Button variant='outline'>Theme Configuration</Button>
-                </Link>
-                <Link to='/request'>
-                    <Button>Request Analysis</Button>
-                </Link>
+                {/* <div className='grow' /> */}
+                <div className='flex flex-col md:flex-row gap-2 '>
+                    <Link to='/theme'>
+                        <Button variant='outline' className='w-full'>
+                            Theme Configuration
+                        </Button>
+                    </Link>
+                    <Link to='/request'>
+                        <Button className='w-full'>Request Analysis</Button>
+                    </Link>
+                </div>
             </div>
             <AnalysesLoading />
         </div>
@@ -62,6 +67,8 @@ function AnalysesLoading({}: IAnalysesLoading) {
     // const [page, setPage] = useState(1);
 
     const { data, isLoading, error } = useQuery(AnalysisKeys.analyses(page));
+
+    const isDesktop = useMediaQuery("(min-width: 767px)");
 
     if (isLoading) return <DataLoaderSpinner title='Loading your analyses.' />;
 
@@ -152,13 +159,15 @@ function AnalysesLoading({}: IAnalysesLoading) {
             </div>
             <Pagination>
                 <PaginationContent>
-                    <PaginationItem>
-                        <PaginationPrevious
-                            onClick={() =>
-                                page > 1 ? navToPage(page - 1) : {}
-                            }
-                        />
-                    </PaginationItem>
+                    {isDesktop && (
+                        <PaginationItem>
+                            <PaginationPrevious
+                                onClick={() =>
+                                    page > 1 ? navToPage(page - 1) : {}
+                                }
+                            />
+                        </PaginationItem>
+                    )}
                     {items.map((item, i) => (
                         <PaginationItem key={i}>
                             <PaginationLink
@@ -173,15 +182,17 @@ function AnalysesLoading({}: IAnalysesLoading) {
                             </PaginationLink>
                         </PaginationItem>
                     ))}
-                    <PaginationItem>
-                        <PaginationNext
-                            onClick={() =>
-                                page < data.totalPages
-                                    ? navToPage(page + 1)
-                                    : {}
-                            }
-                        />
-                    </PaginationItem>
+                    {isDesktop && (
+                        <PaginationItem>
+                            <PaginationNext
+                                onClick={() =>
+                                    page < data.totalPages
+                                        ? navToPage(page + 1)
+                                        : {}
+                                }
+                            />
+                        </PaginationItem>
+                    )}
                 </PaginationContent>
             </Pagination>
         </div>
@@ -259,7 +270,10 @@ function AnalysisItem({ analysisRequest }: IAnalysis) {
                             <div>{status()}</div>
                         )}
 
-                        <LuArrowRight className='size-6' strokeWidth={1.5} />
+                        <LuArrowRight
+                            className='size-6 max-[600px]:hidden '
+                            strokeWidth={1.5}
+                        />
                     </div>
                 </Card>
             </div>
