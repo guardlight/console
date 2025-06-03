@@ -67,7 +67,9 @@ export default function AnalysisScreen({ analysisId }: IAnalysisScreen) {
         return (
             <PageWrapper>
                 <EmptyList title='Analysis result not found.'>
-                    <Link to='/'>Back to Dashboard.</Link>
+                    <Link to='/' search={{ page: 1 }}>
+                        Back to Dashboard.
+                    </Link>
                 </EmptyList>
             </PageWrapper>
         );

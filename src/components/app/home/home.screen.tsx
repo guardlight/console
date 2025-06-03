@@ -20,9 +20,9 @@ import {
 } from "@/domain/analysis/type";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import clsx from "clsx";
-import { ReactNode, useCallback, useState } from "react";
+import { ReactNode, useCallback } from "react";
 import { LuArrowRight } from "react-icons/lu";
 
 type IHomeScreen = {};
@@ -56,7 +56,10 @@ export function HomeScreen({}: IHomeScreen) {
 
 type IAnalysesLoading = {};
 function AnalysesLoading({}: IAnalysesLoading) {
-    const [page, setPage] = useState(1);
+    const { page } = useSearch({ from: "/_app/" });
+    const navigate = useNavigate({ from: "/" });
+
+    // const [page, setPage] = useState(1);
 
     const { data, isLoading, error } = useQuery(AnalysisKeys.analyses(page));
 
@@ -81,6 +84,60 @@ function AnalysesLoading({}: IAnalysesLoading) {
             </EmptyList>
         );
 
+    const generatePages = (
+        current: number,
+        total: number,
+        siblings: number
+    ) => {
+        // current = 10
+        // siblings = 1
+        // total = 20
+
+        // siblins = 1 then totalNumbers = 5
+        const totalNumbers = siblings * 2 + 3;
+        // totalBlocks = 7
+        const totalBlocks = totalNumbers + 2;
+
+        // Show all pages if total is less or equal than 7
+        if (total <= totalBlocks) {
+            return Array.from({ length: total }, (_, i) => i + 1);
+        }
+
+        // current = 10, so 9 is the max
+        const startPage = Math.max(current - siblings, 1);
+        // current + siblings = 11, total is 20, so 11 is the minimum
+        const endPage = Math.min(current + siblings, total);
+
+        // Array of pages ( considering siblings is 1 )
+        const pages = [
+            //startPage = 9, so starts with [1,'...']
+            ...(startPage > 2 ? [1, "..."] : startPage === 1 ? [] : [1]),
+            ...Array.from(
+                // startPage = 9 endPage = 11 then [3 items]
+                { length: endPage - startPage + 1 },
+                // [9,10,11]
+                (_, i) => startPage + i
+            ),
+            // total - 1 = 19, and endPage is 11
+            ...(endPage < total - 1
+                ? // show ['...', 20]
+                  ["...", total]
+                : // if endPage is 20, show nothing at the end
+                  endPage === total
+                  ? []
+                  : // show total after all that
+                    [total]),
+        ];
+
+        return pages;
+    };
+
+    const items = generatePages(page, data.totalPages, 1);
+
+    const navToPage = (newPage: number) => {
+        navigate({ search: (prev) => ({ ...prev, page: newPage }) });
+    };
+
     return (
         <div className='space-y-4'>
             <div className='flex flex-1 flex-col space-y-3'>
@@ -97,26 +154,31 @@ function AnalysesLoading({}: IAnalysesLoading) {
                 <PaginationContent>
                     <PaginationItem>
                         <PaginationPrevious
-                            onClick={() => (page > 1 ? setPage(page - 1) : {})}
+                            onClick={() =>
+                                page > 1 ? navToPage(page - 1) : {}
+                            }
                         />
                     </PaginationItem>
-                    {Array.from(
-                        { length: data.totalPages || 0 },
-                        (_, index) => (
-                            <PaginationItem key={index}>
-                                <PaginationLink
-                                    onClick={() => setPage(index + 1)}
-                                    isActive={index + 1 === page}
-                                >
-                                    {index + 1}
-                                </PaginationLink>
-                            </PaginationItem>
-                        )
-                    )}
+                    {items.map((item, i) => (
+                        <PaginationItem key={i}>
+                            <PaginationLink
+                                onClick={() =>
+                                    item != "..."
+                                        ? navToPage(item as number)
+                                        : {}
+                                }
+                                isActive={item === page}
+                            >
+                                {item}
+                            </PaginationLink>
+                        </PaginationItem>
+                    ))}
                     <PaginationItem>
                         <PaginationNext
                             onClick={() =>
-                                page < data.totalPages ? setPage(page + 1) : {}
+                                page < data.totalPages
+                                    ? navToPage(page + 1)
+                                    : {}
                             }
                         />
                     </PaginationItem>

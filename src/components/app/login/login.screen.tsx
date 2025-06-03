@@ -40,7 +40,9 @@ export default function LoginScreen() {
     const { mutate: loginRequest, isPending } = useMutation({
         mutationFn: (req: LoginRequest) => AuthApi.login(req),
         onSuccess: () => {
-            auth.login("user").then(() => navigate({ to: "/" }));
+            auth.login("user").then(() =>
+                navigate({ to: "/", search: { page: 1 } })
+            );
         },
         onError: (error: GuardlightError) => {
             console.table(error);
