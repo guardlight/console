@@ -1,5 +1,5 @@
 import { HomeScreen } from "@/components/app/home/home.screen";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, retainSearchParams } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_app/")({
     component: RouteComponent,
@@ -7,6 +7,9 @@ export const Route = createFileRoute("/_app/")({
         return {
             page: Number(search?.page ?? 1),
         };
+    },
+    search: {
+        middlewares: [retainSearchParams(["page"])],
     },
 });
 

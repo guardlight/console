@@ -7,6 +7,7 @@ export const Route = createFileRoute("/login")({
         if (context.auth.isAuthenticated) {
             throw redirect({
                 to: "/",
+                search: { page: 1 },
             });
         }
     },
