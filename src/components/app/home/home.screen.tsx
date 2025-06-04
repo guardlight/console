@@ -259,7 +259,7 @@ function AnalysisItem({ analysisRequest }: IAnalysis) {
                 )
             )
             .then(
-                axios.spread((...responses) => {
+                axios.spread((_) => {
                     toast.success("Analysis Approved");
                     invs(AnalysisKeys.analyses(page).queryKey);
                 })

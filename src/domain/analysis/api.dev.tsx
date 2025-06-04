@@ -110,6 +110,7 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
                 title: "Acts of Violence",
                 analyzers: [
                     {
+                        id: "5a1abc7a-c098-4a67-a796-cdf17e73b282",
                         key: "word_search",
                         name: "Word Search",
                         status: "inprogress",
@@ -137,6 +138,7 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
                         ],
                     },
                     {
+                        id: "9b0e2fdd-bfab-4e25-b681-05ebc1fadb49",
                         key: "sentiment_analysis",
                         name: "Sentiment Analysis",
                         status: "finished",
@@ -170,6 +172,7 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
                 title: "Relegious Sensitivity",
                 analyzers: [
                     {
+                        id: "dabffa63-d115-450a-9d6d-1c3feaa80cdf",
                         key: "word_search",
                         name: "Word Search",
                         status: "finished",
@@ -211,6 +214,7 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
                 title: "Acts of Violence",
                 analyzers: [
                     {
+                        id: "8e1f8e9f-5522-491f-8440-88d25a66723d",
                         key: "word_search",
                         name: "Word Search",
                         status: "waiting",
@@ -238,6 +242,7 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
                         ],
                     },
                     {
+                        id: "32aeb690-303f-45cb-8bc6-f7b81716c17d",
                         key: "sentiment_analysis",
                         name: "Sentiment Analysis",
                         status: "waiting",
@@ -273,6 +278,7 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
                 title: "Relegious Sensitivity",
                 analyzers: [
                     {
+                        id: "8dd7251b-f6d4-4247-8379-38c0c0c20f75",
                         key: "word_search",
                         name: "Word Search",
                         status: "finished",
@@ -305,6 +311,7 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
                         ],
                     },
                     {
+                        id: "b0df207e-843b-4e2c-b6c4-e5ba14a6fad6",
                         key: "sentiment_analysis",
                         name: "Sentiment Analysis",
                         status: "waiting",
@@ -348,6 +355,7 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
                 title: "Acts of Violence",
                 analyzers: [
                     {
+                        id: "26f24b8d-70ff-4ba3-8fea-a9d70bd8428c",
                         key: "word_search",
                         name: "Word Search",
                         status: "finished",
@@ -389,6 +397,7 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
                 title: "Acts of Violence",
                 analyzers: [
                     {
+                        id: "466c6043-b08d-4e3e-8e83-29e8b211ceb9",
                         key: "word_search",
                         name: "Word Search",
                         status: "finished",
