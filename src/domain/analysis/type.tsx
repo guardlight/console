@@ -57,6 +57,7 @@ export type ThemeResult = {
 };
 
 export type AnalyzerResult = {
+    id: string;
     key: string;
     name: string;
     status: AnalysisStatus;
@@ -88,10 +89,18 @@ export const NIL_ANALYSIS_RESULT: AnalysisRequestResult = {
 
 export type AnalysisRequestResultBasic = {
     id: string;
+    analysisIds: Array<string>;
     title: string;
     contentType: ContentType;
     overThreshold: boolean;
     status: AnalysisStatus;
     percentageCompleted: number;
     createdAt: Date;
+};
+
+// Analysis Update
+
+export type AnalysisUpdateScore = {
+    id: string;
+    score: number;
 };

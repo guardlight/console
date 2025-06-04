@@ -4,6 +4,7 @@ import {
     AnalysisRequest,
     AnalysisRequestResult,
     AnalysisRequestResultPaginated,
+    AnalysisUpdateScore,
 } from "./type";
 
 export const AnalysisApi = {
@@ -22,6 +23,11 @@ export const AnalysisApi = {
     requestAnalysis: (ar: AnalysisRequest) =>
         axiosInstance
             .post<Array<AnalysisRequestResult>>("/analysis", ar)
+            .then(handleResponse)
+            .catch(handleError),
+    updateAnalysisScore: (scoreUpdate: AnalysisUpdateScore) =>
+        axiosInstance
+            .post<{}>("/analysis/update/score", scoreUpdate)
             .then(handleResponse)
             .catch(handleError),
 };

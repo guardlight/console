@@ -1,9 +1,17 @@
 import { ICON_MAP } from "@/components/const/const";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+    ContextMenu,
+    ContextMenuContent,
+    ContextMenuItem,
+    ContextMenuSeparator,
+    ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import DataLoaderSpinner from "@/components/ui/custom/DataLoader";
 import EmptyList from "@/components/ui/custom/EmptyList";
 import ErrorSoftner from "@/components/ui/custom/ErrorSoftner";
+import useInvalidateQuery from "@/components/ui/custom/Invalidate.hook";
 import {
     Pagination,
     PaginationContent,
@@ -12,7 +20,7 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination";
-import { AnalysisKeys } from "@/domain/analysis/api";
+import { AnalysisApi, AnalysisKeys } from "@/domain/analysis/api";
 import { mapToBasic } from "@/domain/analysis/state";
 import {
     AnalysisRequestResultBasic,
@@ -22,9 +30,11 @@ import { useMediaQuery } from "@/lib/hooks/useMediaQuery.hook";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
+import axios from "axios";
 import clsx from "clsx";
 import { ReactNode, useCallback } from "react";
-import { LuArrowRight } from "react-icons/lu";
+import { LuArrowRight, LuSmile, LuTrash2 } from "react-icons/lu";
+import { toast } from "sonner";
 
 type IHomeScreen = {};
 export function HomeScreen({}: IHomeScreen) {
@@ -216,6 +226,9 @@ type IAnalysis = {
     analysisRequest: AnalysisRequestResultBasic;
 };
 function AnalysisItem({ analysisRequest }: IAnalysis) {
+    const { invs } = useInvalidateQuery();
+    const { page } = useSearch({ from: "/_app/" });
+
     const status = useCallback((): ReactNode => {
         return statusMap[analysisRequest.status];
     }, [analysisRequest]);
@@ -238,45 +251,73 @@ function AnalysisItem({ analysisRequest }: IAnalysis) {
     const isInProgress = analysisRequest.status === "inprogress";
     const isProcessing = isInProgress || analysisRequest.status === "waiting";
 
-    return (
-        <Link
-            to='/analysis/$analysisId'
-            params={{ analysisId: analysisRequest.id }}
-        >
-            <div
-                className={cn(
-                    "rounded-xl cursor-pointer transform transition-transform duration-50 active:scale-97 hover:scale-99",
-                    isProcessing ? "progressing-effect" : ""
-                )}
-            >
-                <Card
-                    className={cn(
-                        "p-4 flex flex-row grow items-center justify-between ",
-                        borderColor()
-                    )}
-                >
-                    <div className='flex items-center space-x-5'>
-                        <div>{icon()}</div>
-                        <div className='text tracking-wider'>
-                            {analysisRequest.title}
-                        </div>
-                    </div>
-                    <div className='flex items-center space-x-8'>
-                        {isInProgress ? (
-                            <div className='animate-pulse'>
-                                {analysisRequest.percentageCompleted}%
-                            </div>
-                        ) : (
-                            <div>{status()}</div>
-                        )}
+    const updateScoreAsApproved = () => {
+        axios
+            .all(
+                analysisRequest.analysisIds.map((aid) =>
+                    AnalysisApi.updateAnalysisScore({ id: aid, score: -1 })
+                )
+            )
+            .then(
+                axios.spread((...responses) => {
+                    toast.success("Analysis Approved");
+                    invs(AnalysisKeys.analyses(page).queryKey);
+                })
+            );
+    };
 
-                        <LuArrowRight
-                            className='size-6 max-[600px]:hidden '
-                            strokeWidth={1.5}
-                        />
+    return (
+        <ContextMenu>
+            <ContextMenuTrigger>
+                <Link
+                    to='/analysis/$analysisId'
+                    params={{ analysisId: analysisRequest.id }}
+                >
+                    <div
+                        className={cn(
+                            "rounded-xl cursor-pointer transform transition-transform duration-50 active:scale-97 hover:scale-99",
+                            isProcessing ? "progressing-effect" : ""
+                        )}
+                    >
+                        <Card
+                            className={cn(
+                                "p-4 flex flex-row grow items-center justify-between ",
+                                borderColor()
+                            )}
+                        >
+                            <div className='flex items-center space-x-5'>
+                                <div>{icon()}</div>
+                                <div className='text tracking-wider'>
+                                    {analysisRequest.title}
+                                </div>
+                            </div>
+                            <div className='flex items-center space-x-8'>
+                                {isInProgress ? (
+                                    <div className='animate-pulse'>
+                                        {analysisRequest.percentageCompleted}%
+                                    </div>
+                                ) : (
+                                    <div>{status()}</div>
+                                )}
+
+                                <LuArrowRight
+                                    className='size-6 max-[600px]:hidden '
+                                    strokeWidth={1.5}
+                                />
+                            </div>
+                        </Card>
                     </div>
-                </Card>
-            </div>
-        </Link>
+                </Link>
+            </ContextMenuTrigger>
+            <ContextMenuContent>
+                <ContextMenuItem onClick={() => updateScoreAsApproved()}>
+                    <LuSmile /> Mark as Approved
+                </ContextMenuItem>
+                <ContextMenuSeparator />
+                <ContextMenuItem disabled>
+                    <LuTrash2 /> Delete Analysis
+                </ContextMenuItem>
+            </ContextMenuContent>
+        </ContextMenu>
     );
 }

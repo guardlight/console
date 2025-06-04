@@ -59,6 +59,7 @@ export function mapToBasic(
 
     return {
         id: ar.id,
+        analysisIds: ar.themes.flatMap((t) => t.analyzers).flatMap((a) => a.id),
         title: ar.title,
         contentType: ar.contentType,
         overThreshold: overThreshold,
