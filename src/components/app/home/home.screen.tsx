@@ -33,7 +33,7 @@ import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import axios from "axios";
 import clsx from "clsx";
 import { ReactNode, useCallback } from "react";
-import { LuArrowRight, LuSmile, LuTrash2 } from "react-icons/lu";
+import { LuArrowRight, LuFrown, LuSmile, LuTrash2 } from "react-icons/lu";
 import { toast } from "sonner";
 
 type IHomeScreen = {};
@@ -251,16 +251,16 @@ function AnalysisItem({ analysisRequest }: IAnalysis) {
     const isInProgress = analysisRequest.status === "inprogress";
     const isProcessing = isInProgress || analysisRequest.status === "waiting";
 
-    const updateScoreAsApproved = () => {
+    const updateScore = (score: number) => {
         axios
             .all(
                 analysisRequest.analysisIds.map((aid) =>
-                    AnalysisApi.updateAnalysisScore({ id: aid, score: -1 })
+                    AnalysisApi.updateAnalysisScore({ id: aid, score: score })
                 )
             )
             .then(
                 axios.spread((_) => {
-                    toast.success("Analysis Approved");
+                    toast.success("Analysis Updated");
                     invs(AnalysisKeys.analyses(page).queryKey);
                 })
             );
@@ -310,9 +310,16 @@ function AnalysisItem({ analysisRequest }: IAnalysis) {
                 </Link>
             </ContextMenuTrigger>
             <ContextMenuContent>
-                <ContextMenuItem onClick={() => updateScoreAsApproved()}>
-                    <LuSmile /> Mark as Approved
-                </ContextMenuItem>
+                {analysisRequest.overThreshold ? (
+                    <ContextMenuItem onClick={() => updateScore(-1)}>
+                        <LuSmile /> Mark as Approved
+                    </ContextMenuItem>
+                ) : (
+                    <ContextMenuItem onClick={() => updateScore(1)}>
+                        <LuFrown /> Mark as Flagged
+                    </ContextMenuItem>
+                )}
+
                 <ContextMenuSeparator />
                 <ContextMenuItem disabled>
                     <LuTrash2 /> Delete Analysis
