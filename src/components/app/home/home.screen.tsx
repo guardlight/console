@@ -28,7 +28,7 @@ import {
 } from "@/domain/analysis/type";
 import { useMediaQuery } from "@/lib/hooks/useMediaQuery.hook";
 import { cn } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import axios from "axios";
 import clsx from "clsx";
@@ -266,6 +266,17 @@ function AnalysisItem({ analysisRequest }: IAnalysis) {
             );
     };
 
+    const { mutate: deleteAnalysisRequest } = useMutation({
+        mutationFn: () => AnalysisApi.deleteAnalysisRequest(analysisRequest.id),
+        onSuccess: () => {
+            toast.success("Analysis Deleted");
+            invs(AnalysisKeys.analyses(page).queryKey);
+        },
+        onError: (_) => {
+            toast.error("Analysis not Deleted. Please try again");
+        },
+    });
+
     return (
         <ContextMenu>
             <ContextMenuTrigger>
@@ -321,8 +332,8 @@ function AnalysisItem({ analysisRequest }: IAnalysis) {
                 )}
 
                 <ContextMenuSeparator />
-                <ContextMenuItem disabled>
-                    <LuTrash2 /> Delete Analysis
+                <ContextMenuItem onClick={() => deleteAnalysisRequest()}>
+                    <LuTrash2 /> Delete Analysis Request
                 </ContextMenuItem>
             </ContextMenuContent>
         </ContextMenu>

@@ -30,6 +30,12 @@ export const AnalysisApi = {
             .post<{}>("/analysis/update/score", scoreUpdate)
             .then(handleResponse)
             .catch(handleError),
+
+    deleteAnalysisRequest: (analysisRequestId: string) =>
+        axiosInstance
+            .delete<{}>(`/analysis/${analysisRequestId}`)
+            .then(handleResponse)
+            .catch(handleError),
 };
 
 export const AnalysisKeys = {
