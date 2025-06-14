@@ -172,10 +172,14 @@ export default function RequestScreen({}: IRequestScreen) {
         requestAnalysis(ar);
     };
 
+    const isAtStep = (step: number) => {
+        return steps.sort()[steps.length - 1] == step;
+    };
+
     return (
         <div className='flex flex-1 grow flex-col max-w-3xl space-y-3 my-4 md:my-24'>
             <StepLayout
-                open={steps.includes(0)}
+                open={isAtStep(0)}
                 index={1}
                 title='Analysis Request Title'
                 active={steps.includes(0)}
@@ -223,7 +227,7 @@ export default function RequestScreen({}: IRequestScreen) {
                 </div>
             </StepLayout>
             <StepLayout
-                open={steps.includes(1)}
+                open={isAtStep(1)}
                 index={2}
                 title='Select Analysis Media Type'
                 active={steps.includes(1)}
@@ -240,7 +244,7 @@ export default function RequestScreen({}: IRequestScreen) {
                 <ParserSection ar={ar} selectMimeType={selectMimeType} />
             </StepLayout>
             <StepLayout
-                open={steps.includes(2)}
+                open={isAtStep(2)}
                 index={3}
                 title='Add Analysis Media Content'
                 active={steps.includes(2)}
@@ -267,7 +271,7 @@ export default function RequestScreen({}: IRequestScreen) {
                 {/* <Button onClick={setFromClipboard}>From Clipboard</Button> */}
             </StepLayout>
             <StepLayout
-                open={steps.includes(3)}
+                open={isAtStep(3)}
                 index={4}
                 title='Select Analysis Themes'
                 active={steps.includes(3)}
@@ -284,7 +288,7 @@ export default function RequestScreen({}: IRequestScreen) {
                 <ThemesSection ar={ar} toggleTheme={toggleTheme} />
             </StepLayout>
             <StepLayout
-                open={steps.includes(4)}
+                open={isAtStep(4)}
                 index={5}
                 title='Analysis Techniques Used'
                 active={steps.includes(4)}
@@ -296,7 +300,7 @@ export default function RequestScreen({}: IRequestScreen) {
                 <AnalyzerThemesOverviewSection ar={ar} />
             </StepLayout>
             <StepLayout
-                open={steps.includes(5)}
+                open={isAtStep(5)}
                 index={6}
                 title='Submit Analysis Request'
                 active={steps.includes(5)}
