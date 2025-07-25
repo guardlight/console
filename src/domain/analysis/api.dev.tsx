@@ -102,6 +102,8 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
     {
         id: "d3bcda0f-e731-4de1-ae4a-3e604168ec63",
         title: "Alice in Wonderland",
+        category: "Fantasy",
+        requestOrigin: "user",
         contentType: "book",
         createdAt: new Date(),
         themes: [
@@ -207,6 +209,8 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
         id: "2cbb1156-6211-4580-b770-89d8ea65c003",
         title: "Jack Reacher",
         contentType: "series",
+        category: "Thriller",
+        requestOrigin: "user",
         createdAt: new Date(),
         themes: [
             {
@@ -348,6 +352,8 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
         id: "16cacb82-56aa-4eb7-b49f-c95d87211cbe",
         title: "Alice in Wonderland",
         contentType: "movie",
+        category: "Fantasy",
+        requestOrigin: "user",
         createdAt: new Date(),
         themes: [
             {
@@ -390,6 +396,8 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
         id: "b15697a8-e83e-489f-b52d-eeb7c3b38e48",
         title: "American Horror Show",
         contentType: "series",
+        category: "Horror",
+        requestOrigin: "user",
         createdAt: new Date(),
         themes: [
             {
