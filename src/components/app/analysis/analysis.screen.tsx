@@ -86,7 +86,12 @@ export default function AnalysisScreen({ analysisId }: IAnalysisScreen) {
                 <span className='text-xs text-muted-foreground font-light grow'>
                     Analysis Report
                 </span>
-                <IconComponent className='size-7' />
+                <div className='flex flex-row gap-2'>
+                    <span className='text-muted-foreground font-light'>
+                        {analysisResult.category}
+                    </span>
+                    <IconComponent className='size-7' />
+                </div>
             </div>
             <Accordion
                 type='multiple'

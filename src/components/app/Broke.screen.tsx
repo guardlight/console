@@ -9,7 +9,7 @@ export default function SomethingBrokeScreen({ error }: ISomethingBrokeScreen) {
     return (
         <div className='flex flex-col items-center justify-center h-screen text-center space-y-3'>
             <h1 className='text-4xl font-bold'>Something went wrong</h1>
-            <Link to='/' search={{ page: 1 }} className=''>
+            <Link to='/' search={{ page: 1, category: undefined }} className=''>
                 <Button variant='link'>
                     Go back to the main screen <LuHouse />
                 </Button>

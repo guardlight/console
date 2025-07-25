@@ -8,10 +8,14 @@ import {
 } from "./type";
 
 export const AnalysisApi = {
-    getAnalyses: (page: number) =>
+    getAnalyses: (
+        page: number,
+        category: string | undefined,
+        query: string | undefined
+    ) =>
         axiosInstance
             .get<AnalysisRequestResultPaginated>(
-                `/analysis?limit=6&page=${page}`
+                `/analysis?limit=6&page=${page}&category=${category || ""}&query=${query || ""}`
             )
             .then(handleResponse)
             .catch(handleError),
@@ -39,10 +43,14 @@ export const AnalysisApi = {
 };
 
 export const AnalysisKeys = {
-    analyses: (page: number) =>
+    analyses: (
+        page: number,
+        category: string | undefined,
+        query: string | undefined
+    ) =>
         queryOptions({
             queryKey: ["analyses", page],
-            queryFn: () => AnalysisApi.getAnalyses(page),
+            queryFn: () => AnalysisApi.getAnalyses(page, category, query),
             refetchOnWindowFocus: false,
             retry: 0, // remove
             refetchOnMount: false,

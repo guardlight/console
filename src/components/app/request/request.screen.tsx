@@ -25,6 +25,7 @@ import {
     AnalysisRequest,
     Analyzer,
     ContentType,
+    GENRE_MAP,
     Theme,
 } from "@/domain/analysis/type";
 import { ParserKeys } from "@/domain/parser/api";
@@ -47,83 +48,6 @@ import {
 import { DropzoneOptions, useDropzone } from "react-dropzone";
 import { LuLoaderCircle } from "react-icons/lu";
 import { toast } from "sonner";
-
-const genreMap: Record<string, Array<string>> = {
-    book: [
-        "Fantasy",
-        "Science Fiction",
-        "Mystery",
-        "Thriller",
-        "Romance",
-        "Historical",
-        "Horror",
-        "Biography",
-        "Self-Help",
-        "Young Adult",
-        "Non-Fiction",
-        "Classic",
-        "Graphic Novel",
-        "Poetry",
-        "Adventure",
-    ],
-    movie: [
-        "Action",
-        "Comedy",
-        "Drama",
-        "Fantasy",
-        "Horror",
-        "Mystery",
-        "Romance",
-        "Science Fiction",
-        "Thriller",
-        "Documentary",
-        "Animation",
-        "Crime",
-        "Adventure",
-        "Biography",
-        "Family",
-        "Musical",
-        "Western",
-        "Superhero",
-    ],
-    series: [
-        "Action",
-        "Comedy",
-        "Drama",
-        "Fantasy",
-        "Horror",
-        "Mystery",
-        "Romance",
-        "Science Fiction",
-        "Thriller",
-        "Documentary",
-        "Animation",
-        "Crime",
-        "Adventure",
-        "Biography",
-        "Family",
-        "Musical",
-        "Western",
-        "Superhero",
-    ],
-    lyrics: [
-        "Pop",
-        "Rock",
-        "Hip Hop",
-        "R&B",
-        "Country",
-        "Jazz",
-        "Blues",
-        "Reggae",
-        "Metal",
-        "Folk",
-        "Electronic",
-        "Soul",
-        "Punk",
-        "Classical",
-        "Dance",
-    ],
-};
 
 type IRequestScreen = {};
 export default function RequestScreen({}: IRequestScreen) {
@@ -318,7 +242,7 @@ export default function RequestScreen({}: IRequestScreen) {
                     </div>
                     <div className='flex flex-row gap-3'>
                         <Input
-                            placeholder={`Eneter ${ar.contentType} analysis request title`}
+                            placeholder={`Enter ${ar.contentType} analysis request title`}
                             onChange={(e) => updateTitle(e.target.value)}
                             value={ar.title}
                             className='rounded-xl basis-9/12'
@@ -327,11 +251,11 @@ export default function RequestScreen({}: IRequestScreen) {
                             onValueChange={(e) => updateCategory(e)}
                             value={ar.category}
                         >
-                            <SelectTrigger className=' rounded-xl basis-3/12'>
+                            <SelectTrigger className='rounded-xl basis-3/12'>
                                 <SelectValue placeholder='Genre' />
                             </SelectTrigger>
                             <SelectContent>
-                                {Object.values(genreMap[ar.contentType]).map(
+                                {Object.values(GENRE_MAP[ar.contentType]).map(
                                     (val) => (
                                         <SelectItem key={val} value={val}>
                                             {val}

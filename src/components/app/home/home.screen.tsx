@@ -12,6 +12,7 @@ import DataLoaderSpinner from "@/components/ui/custom/DataLoader";
 import EmptyList from "@/components/ui/custom/EmptyList";
 import ErrorSoftner from "@/components/ui/custom/ErrorSoftner";
 import useInvalidateQuery from "@/components/ui/custom/Invalidate.hook";
+import { Input } from "@/components/ui/input";
 import {
     Pagination,
     PaginationContent,
@@ -20,11 +21,21 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination";
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { AnalysisApi, AnalysisKeys } from "@/domain/analysis/api";
 import { mapToBasic } from "@/domain/analysis/state";
 import {
     AnalysisRequestResultBasic,
     AnalysisStatus,
+    GENRE_MAP,
 } from "@/domain/analysis/type";
 import { useMediaQuery } from "@/lib/hooks/useMediaQuery.hook";
 import { cn } from "@/lib/utils";
@@ -32,9 +43,10 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import axios from "axios";
 import clsx from "clsx";
-import { ReactNode, useCallback } from "react";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 import { LuArrowRight, LuFrown, LuSmile, LuTrash2 } from "react-icons/lu";
 import { toast } from "sonner";
+import { useDebouncedCallback } from "use-debounce";
 
 type IHomeScreen = {};
 export function HomeScreen({}: IHomeScreen) {
@@ -69,16 +81,82 @@ export function HomeScreen({}: IHomeScreen) {
     );
 }
 
+const generatePages = (current: number, total: number, siblings: number) => {
+    // current = 10
+    // siblings = 1
+    // total = 20
+
+    // siblins = 1 then totalNumbers = 5
+    const totalNumbers = siblings * 2 + 3;
+    // totalBlocks = 7
+    const totalBlocks = totalNumbers + 2;
+
+    // Show all pages if total is less or equal than 7
+    if (total <= totalBlocks) {
+        return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    // current = 10, so 9 is the max
+    const startPage = Math.max(current - siblings, 1);
+    // current + siblings = 11, total is 20, so 11 is the minimum
+    const endPage = Math.min(current + siblings, total);
+
+    // Array of pages ( considering siblings is 1 )
+    const pages = [
+        //startPage = 9, so starts with [1,'...']
+        ...(startPage > 2 ? [1, "..."] : startPage === 1 ? [] : [1]),
+        ...Array.from(
+            // startPage = 9 endPage = 11 then [3 items]
+            { length: endPage - startPage + 1 },
+            // [9,10,11]
+            (_, i) => startPage + i
+        ),
+        // total - 1 = 19, and endPage is 11
+        ...(endPage < total - 1
+            ? // show ['...', 20]
+              ["...", total]
+            : // if endPage is 20, show nothing at the end
+              endPage === total
+              ? []
+              : // show total after all that
+                [total]),
+    ];
+
+    return pages;
+};
+
 type IAnalysesLoading = {};
 function AnalysesLoading({}: IAnalysesLoading) {
-    const { page } = useSearch({ from: "/_app/" });
+    const { page, category, query } = useSearch({ from: "/_app/" });
     const navigate = useNavigate({ from: "/" });
+    const [queryStr, setQueryStr] = useState(query || "");
 
-    // const [page, setPage] = useState(1);
-
-    const { data, isLoading, error } = useQuery(AnalysisKeys.analyses(page));
+    const { data, isLoading, error } = useQuery(
+        AnalysisKeys.analyses(page, category, query)
+    );
 
     const isDesktop = useMediaQuery("(min-width: 767px)");
+
+    const debouncedQuery = useDebouncedCallback((value) => {
+        navigate({
+            search: (prev) => ({
+                ...prev,
+                query: value === "" ? undefined : value,
+                page: 1,
+            }),
+        });
+    }, 1000);
+
+    const { invs } = useInvalidateQuery();
+
+    useEffect(() => {
+        invs(AnalysisKeys.analyses(page, category, query).queryKey);
+    }, [page, category, query]);
+
+    const getPaginationItems = useCallback(
+        () => generatePages(page, data?.totalPages || 1, 1),
+        [page, category, query, data]
+    );
 
     if (isLoading) return <DataLoaderSpinner title='Loading your analyses.' />;
 
@@ -86,11 +164,11 @@ function AnalysesLoading({}: IAnalysesLoading) {
         return (
             <ErrorSoftner
                 title="Couldn't load your analyses."
-                queryKeys={AnalysisKeys.analyses(1).queryKey}
+                queryKeys={AnalysisKeys.analyses(1, category, query).queryKey}
             />
         );
 
-    if (!data || data.analyses.length === 0)
+    if (!data)
         return (
             <EmptyList title='No analyses done yet.'>
                 <p>
@@ -101,63 +179,67 @@ function AnalysesLoading({}: IAnalysesLoading) {
             </EmptyList>
         );
 
-    const generatePages = (
-        current: number,
-        total: number,
-        siblings: number
-    ) => {
-        // current = 10
-        // siblings = 1
-        // total = 20
-
-        // siblins = 1 then totalNumbers = 5
-        const totalNumbers = siblings * 2 + 3;
-        // totalBlocks = 7
-        const totalBlocks = totalNumbers + 2;
-
-        // Show all pages if total is less or equal than 7
-        if (total <= totalBlocks) {
-            return Array.from({ length: total }, (_, i) => i + 1);
-        }
-
-        // current = 10, so 9 is the max
-        const startPage = Math.max(current - siblings, 1);
-        // current + siblings = 11, total is 20, so 11 is the minimum
-        const endPage = Math.min(current + siblings, total);
-
-        // Array of pages ( considering siblings is 1 )
-        const pages = [
-            //startPage = 9, so starts with [1,'...']
-            ...(startPage > 2 ? [1, "..."] : startPage === 1 ? [] : [1]),
-            ...Array.from(
-                // startPage = 9 endPage = 11 then [3 items]
-                { length: endPage - startPage + 1 },
-                // [9,10,11]
-                (_, i) => startPage + i
-            ),
-            // total - 1 = 19, and endPage is 11
-            ...(endPage < total - 1
-                ? // show ['...', 20]
-                  ["...", total]
-                : // if endPage is 20, show nothing at the end
-                  endPage === total
-                  ? []
-                  : // show total after all that
-                    [total]),
-        ];
-
-        return pages;
-    };
-
-    const items = generatePages(page, data.totalPages, 1);
-
     const navToPage = (newPage: number) => {
         navigate({ search: (prev) => ({ ...prev, page: newPage }) });
     };
 
+    const selectCategory = (cat: string) => {
+        navigate({
+            search: (prev) => ({
+                ...prev,
+                category: cat === "all:All" ? undefined : cat,
+                page: 1,
+            }),
+        });
+    };
+
+    const updateSearchQuery = (query: string) => {
+        setQueryStr(query);
+        debouncedQuery(query);
+    };
+
     return (
         <div className='space-y-4'>
+            <div className='flex flex-row gap-3'>
+                <Input
+                    placeholder={`Search for analysis request`}
+                    onChange={(e) => updateSearchQuery(e.target.value)}
+                    value={queryStr}
+                    className='rounded-xl basis-9/12'
+                />
+                <Select
+                    onValueChange={(cat) => selectCategory(cat)}
+                    defaultValue={category}
+                >
+                    <SelectTrigger className='rounded-xl basis-3/12'>
+                        <SelectValue placeholder='Select a genre' />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem key='all:All' value='all:All'>
+                            All
+                        </SelectItem>
+                        {Object.keys(GENRE_MAP).map((gkey) => (
+                            <SelectGroup key={gkey}>
+                                <SelectLabel className='capitalize'>
+                                    {gkey}
+                                </SelectLabel>
+                                {GENRE_MAP[gkey].map((cat) => (
+                                    <SelectItem
+                                        key={`${gkey}:${cat}`}
+                                        value={`${gkey}:${cat}`}
+                                    >
+                                        {cat}
+                                    </SelectItem>
+                                ))}
+                            </SelectGroup>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
             <div className='flex flex-1 flex-col space-y-3'>
+                {data.analyses.length === 0 && (
+                    <EmptyList title='No analyses found.'></EmptyList>
+                )}
                 {data.analyses
                     .map((ar) => mapToBasic(ar))
                     .map((analysis) => (
@@ -178,7 +260,7 @@ function AnalysesLoading({}: IAnalysesLoading) {
                             />
                         </PaginationItem>
                     )}
-                    {items.map((item, i) => (
+                    {getPaginationItems().map((item, i) => (
                         <PaginationItem key={i}>
                             <PaginationLink
                                 onClick={() =>
@@ -227,7 +309,7 @@ type IAnalysis = {
 };
 function AnalysisItem({ analysisRequest }: IAnalysis) {
     const { invs } = useInvalidateQuery();
-    const { page } = useSearch({ from: "/_app/" });
+    const { page, category, query } = useSearch({ from: "/_app/" });
 
     const status = useCallback((): ReactNode => {
         return statusMap[analysisRequest.status];
@@ -261,7 +343,7 @@ function AnalysisItem({ analysisRequest }: IAnalysis) {
             .then(
                 axios.spread((_) => {
                     toast.success("Analysis Updated");
-                    invs(AnalysisKeys.analyses(page).queryKey);
+                    invs(AnalysisKeys.analyses(page, category, query).queryKey);
                 })
             );
     };
@@ -270,7 +352,7 @@ function AnalysisItem({ analysisRequest }: IAnalysis) {
         mutationFn: () => AnalysisApi.deleteAnalysisRequest(analysisRequest.id),
         onSuccess: () => {
             toast.success("Analysis Deleted");
-            invs(AnalysisKeys.analyses(page).queryKey);
+            invs(AnalysisKeys.analyses(page, category, query).queryKey);
         },
         onError: (_) => {
             toast.error("Analysis not Deleted. Please try again");
@@ -300,8 +382,8 @@ function AnalysisItem({ analysisRequest }: IAnalysis) {
                                 <div>{icon()}</div>
                                 <div className='text tracking-wider'>
                                     {analysisRequest.title}
-                                    <span className='text-gray-500 text-sm tracking-wider ml-2 font-extralight'>
-                                        {analysisRequest.category}
+                                    <span className='text-muted-foreground font-light tracking-wider ml-2'>
+                                        &#x2022; {analysisRequest.category}
                                     </span>
                                 </div>
                             </div>
