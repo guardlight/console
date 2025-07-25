@@ -1,11 +1,13 @@
 export type AnalysisStatus = "waiting" | "inprogress" | "finished" | "error";
 export type ContentType = "book" | "movie" | "series" | "lyrics";
+export type RequestOrigin = "user" | "system" | "dataloom" | "external";
 
 // Analysis Request
 
 export type AnalysisRequest = {
     title: string;
     contentType: ContentType;
+    category: string;
     file: File;
     themes: Array<Theme>;
 };
@@ -45,6 +47,8 @@ export type AnalysisRequestResultPaginated = {
 export type AnalysisRequestResult = {
     id: string;
     title: string;
+    category: string;
+    requestOrigin: RequestOrigin;
     contentType: ContentType;
     themes: Array<ThemeResult>;
     createdAt: Date;
@@ -81,6 +85,8 @@ export const NIL_ANALYSIS_RESULT: AnalysisRequestResult = {
     id: "",
     title: "",
     contentType: "book",
+    category: "",
+    requestOrigin: "user",
     themes: [],
     createdAt: new Date(),
 };
@@ -91,6 +97,7 @@ export type AnalysisRequestResultBasic = {
     id: string;
     analysisIds: Array<string>;
     title: string;
+    category: string;
     contentType: ContentType;
     overThreshold: boolean;
     status: AnalysisStatus;

@@ -12,6 +12,13 @@ import EmptyList from "@/components/ui/custom/EmptyList";
 import ErrorSoftner from "@/components/ui/custom/ErrorSoftner";
 import useGoBack from "@/components/ui/custom/GoBack.hook";
 import { Input } from "@/components/ui/input";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { AnalysisApi } from "@/domain/analysis/api";
 import {
@@ -41,11 +48,89 @@ import { DropzoneOptions, useDropzone } from "react-dropzone";
 import { LuLoaderCircle } from "react-icons/lu";
 import { toast } from "sonner";
 
+const genreMap: Record<string, Array<string>> = {
+    book: [
+        "Fantasy",
+        "Science Fiction",
+        "Mystery",
+        "Thriller",
+        "Romance",
+        "Historical",
+        "Horror",
+        "Biography",
+        "Self-Help",
+        "Young Adult",
+        "Non-Fiction",
+        "Classic",
+        "Graphic Novel",
+        "Poetry",
+        "Adventure",
+    ],
+    movie: [
+        "Action",
+        "Comedy",
+        "Drama",
+        "Fantasy",
+        "Horror",
+        "Mystery",
+        "Romance",
+        "Science Fiction",
+        "Thriller",
+        "Documentary",
+        "Animation",
+        "Crime",
+        "Adventure",
+        "Biography",
+        "Family",
+        "Musical",
+        "Western",
+        "Superhero",
+    ],
+    series: [
+        "Action",
+        "Comedy",
+        "Drama",
+        "Fantasy",
+        "Horror",
+        "Mystery",
+        "Romance",
+        "Science Fiction",
+        "Thriller",
+        "Documentary",
+        "Animation",
+        "Crime",
+        "Adventure",
+        "Biography",
+        "Family",
+        "Musical",
+        "Western",
+        "Superhero",
+    ],
+    lyrics: [
+        "Pop",
+        "Rock",
+        "Hip Hop",
+        "R&B",
+        "Country",
+        "Jazz",
+        "Blues",
+        "Reggae",
+        "Metal",
+        "Folk",
+        "Electronic",
+        "Soul",
+        "Punk",
+        "Classical",
+        "Dance",
+    ],
+};
+
 type IRequestScreen = {};
 export default function RequestScreen({}: IRequestScreen) {
     const [ar, setAr] = useState<AnalysisRequest>({
         title: "",
         contentType: "book",
+        category: "",
         file: {
             content: "",
             mimetype: "",
@@ -85,6 +170,9 @@ export default function RequestScreen({}: IRequestScreen) {
     const addStep = (n: number) => {
         setSteps((prevState) => [...prevState, n]);
     };
+    const removeStep = (n: number) => {
+        setSteps((prevState) => prevState.filter((p) => p != n));
+    };
 
     const updateTitle = (title: string) => {
         setAr((prevState) => {
@@ -95,11 +183,21 @@ export default function RequestScreen({}: IRequestScreen) {
         });
     };
 
+    const updateCategory = (category: string) => {
+        setAr((prevState) => {
+            return {
+                ...prevState,
+                category: category,
+            };
+        });
+    };
+
     const selectContentType = (type: ContentType) => {
         setAr((prevState) => {
             return {
                 ...prevState,
                 contentType: type,
+                category: "",
             };
         });
     };
@@ -185,7 +283,9 @@ export default function RequestScreen({}: IRequestScreen) {
                 active={steps.includes(0)}
                 nextButton={() => (
                     <Button
-                        disabled={!(ar.title.length > 0)}
+                        disabled={
+                            !(ar.title.length > 0 && ar.category.length > 0)
+                        }
                         onClick={() => addStep(1)}
                     >
                         Next Step
@@ -194,14 +294,6 @@ export default function RequestScreen({}: IRequestScreen) {
                 steps={steps}
             >
                 <div className='space-y-3'>
-                    <div>
-                        <Input
-                            placeholder='Enter Media Title'
-                            onChange={(e) => updateTitle(e.target.value)}
-                            value={ar.title}
-                            className='rounded-xl'
-                        />
-                    </div>
                     <div className='flex flex-row gap-2'>
                         <RequestType
                             onClick={() => selectContentType("book")}
@@ -224,6 +316,31 @@ export default function RequestScreen({}: IRequestScreen) {
                             selected={ar.contentType == "lyrics"}
                         />
                     </div>
+                    <div className='flex flex-row gap-3'>
+                        <Input
+                            placeholder={`Eneter ${ar.contentType} analysis request title`}
+                            onChange={(e) => updateTitle(e.target.value)}
+                            value={ar.title}
+                            className='rounded-xl basis-9/12'
+                        />
+                        <Select
+                            onValueChange={(e) => updateCategory(e)}
+                            value={ar.category}
+                        >
+                            <SelectTrigger className=' rounded-xl basis-3/12'>
+                                <SelectValue placeholder='Genre' />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {Object.values(genreMap[ar.contentType]).map(
+                                    (val) => (
+                                        <SelectItem key={val} value={val}>
+                                            {val}
+                                        </SelectItem>
+                                    )
+                                )}
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
             </StepLayout>
             <StepLayout
@@ -237,6 +354,11 @@ export default function RequestScreen({}: IRequestScreen) {
                         onClick={() => addStep(2)}
                     >
                         Next Step
+                    </Button>
+                )}
+                previousButton={() => (
+                    <Button variant='outline' onClick={() => removeStep(1)}>
+                        Previous Step
                     </Button>
                 )}
                 steps={steps}
@@ -254,6 +376,11 @@ export default function RequestScreen({}: IRequestScreen) {
                         onClick={() => addStep(3)}
                     >
                         Next Step
+                    </Button>
+                )}
+                previousButton={() => (
+                    <Button variant='outline' onClick={() => removeStep(2)}>
+                        Previous Step
                     </Button>
                 )}
                 steps={steps}
@@ -283,6 +410,11 @@ export default function RequestScreen({}: IRequestScreen) {
                         Next Step
                     </Button>
                 )}
+                previousButton={() => (
+                    <Button variant='outline' onClick={() => removeStep(3)}>
+                        Previous Step
+                    </Button>
+                )}
                 steps={steps}
             >
                 <ThemesSection ar={ar} toggleTheme={toggleTheme} />
@@ -294,6 +426,17 @@ export default function RequestScreen({}: IRequestScreen) {
                 active={steps.includes(4)}
                 nextButton={() => (
                     <Button onClick={() => addStep(5)}>Next Step</Button>
+                )}
+                previousButton={() => (
+                    <Button
+                        variant='outline'
+                        disabled={
+                            !(ar.title.length > 0 && ar.category.length > 0)
+                        }
+                        onClick={() => removeStep(4)}
+                    >
+                        Previous Step
+                    </Button>
                 )}
                 steps={steps}
             >
@@ -310,6 +453,17 @@ export default function RequestScreen({}: IRequestScreen) {
                             <LuLoaderCircle className='animate-spin' />
                         )}
                         Submit Analysis Request
+                    </Button>
+                )}
+                previousButton={() => (
+                    <Button
+                        variant='outline'
+                        disabled={
+                            !(ar.title.length > 0 && ar.category.length > 0)
+                        }
+                        onClick={() => removeStep(5)}
+                    >
+                        Previous Step
                     </Button>
                 )}
                 steps={steps}
@@ -683,6 +837,7 @@ type IStepLayout = {
     index: number;
     title: string;
     nextButton: () => ReactNode;
+    previousButton?: () => ReactNode;
     steps: Array<number>;
 };
 function StepLayout({
@@ -693,6 +848,7 @@ function StepLayout({
     title,
     steps,
     nextButton,
+    previousButton,
 }: PropsWithChildren & IStepLayout) {
     const activeStyles: Record<string, string> = {
         true: clsx`bg-primary text-white`,
@@ -722,7 +878,15 @@ function StepLayout({
                     <div className='my-3 w-full'>
                         {children}
                         {steps[steps.length - 1] === index - 1 && (
-                            <div className='flex justify-end mt-3'>
+                            <div
+                                className={cn(
+                                    `flex mt-3`,
+                                    previousButton
+                                        ? "justify-between"
+                                        : "justify-end"
+                                )}
+                            >
+                                {previousButton && previousButton()}
                                 {nextButton()}
                             </div>
                         )}

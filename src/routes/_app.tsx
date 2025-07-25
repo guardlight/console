@@ -71,7 +71,7 @@ function RouteComponent() {
         return () => es.close();
     }, []);
 
-    const handleMessage = (e: MessageEvent<any>) => {
+    const handleMessage = async (e: MessageEvent<any>) => {
         if (e.data) {
             const ev: Event = JSON.parse(e.data);
             if ("update" === ev.type) {
@@ -79,6 +79,7 @@ function RouteComponent() {
                     "analysis_done" === ev.action ||
                     "analysis_requested" === ev.action
                 ) {
+                    await sleep(500);
                     invs(AnalysisKeys.analyses(1).queryKey);
                 }
             }
@@ -97,6 +98,8 @@ function RouteComponent() {
         </div>
     );
 }
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 type IHeader = {
     serverDisconnected: boolean;

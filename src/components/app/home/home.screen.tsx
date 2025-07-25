@@ -300,6 +300,9 @@ function AnalysisItem({ analysisRequest }: IAnalysis) {
                                 <div>{icon()}</div>
                                 <div className='text tracking-wider'>
                                     {analysisRequest.title}
+                                    <span className='text-gray-500 text-sm tracking-wider ml-2 font-extralight'>
+                                        {analysisRequest.category}
+                                    </span>
                                 </div>
                             </div>
                             <div className='flex items-center space-x-8'>

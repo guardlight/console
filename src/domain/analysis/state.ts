@@ -66,5 +66,6 @@ export function mapToBasic(
         status: status,
         percentageCompleted: percentageCompleted,
         createdAt: ar.createdAt,
+        category: ar.category,
     } as AnalysisRequestResultBasic;
 }
