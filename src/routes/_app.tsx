@@ -29,7 +29,7 @@ export const Route = createFileRoute("/_app")({
 
 type Event = {
     type: "update" | "heartbeat";
-    action: "analysis_done" | "analysis_requested" | "beat";
+    action: "analysis_done" | "analysis_requested" | "report_done" | "beat";
     data: string;
 };
 
@@ -77,6 +77,7 @@ function RouteComponent() {
             if ("update" === ev.type) {
                 if (
                     "analysis_done" === ev.action ||
+                    "report_done" === ev.action ||
                     "analysis_requested" === ev.action
                 ) {
                     await sleep(500);

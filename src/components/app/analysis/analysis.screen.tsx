@@ -17,23 +17,29 @@ import { AnalysisKeys } from "@/domain/analysis/api";
 import {
     AnalyzerInputResult,
     AnalyzerResult,
+    ScoreCount,
+    ScoreCountStatus,
     ThemeResult,
 } from "@/domain/analysis/type";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
-import { PropsWithChildren, useCallback } from "react";
+import { PropsWithChildren } from "react";
 import { LuLoaderCircle, LuTags } from "react-icons/lu";
 
-const StatusColorMap: Record<string, string> = {
-    false: clsx(`border-emerald-500 shadow-green-100 text-emerald-700`),
-    true: clsx(`border-red-400 shadow-red-100 text-red-700`),
+const StatusColorMap: Record<ScoreCountStatus, string> = {
+    GOOD: clsx(`border-emerald-500 shadow-green-100 text-emerald-700`),
+    BAD: clsx(`border-red-400 shadow-red-100 text-red-700`),
+    MIXED: clsx(`border-orange-400 shadow-orange-100 text-orange-700`),
+    NEUTRAL: clsx(``),
 };
 
-const StatusThemeTitleMap: Record<string, string> = {
-    false: "Theme not flagged",
-    true: "Theme flagged",
+const StatusThemeTitleMap: Record<ScoreCountStatus, string> = {
+    GOOD: "Theme approved",
+    BAD: "Theme matches criteria",
+    MIXED: "Theme mix match criteria",
+    NEUTRAL: "Unreported theme",
 };
 
 type IAnalysisScreen = {
@@ -122,13 +128,20 @@ type IThemeAccordion = {
     theme: ThemeResult;
 };
 function ThemeAccordion({ theme }: IThemeAccordion) {
-    const overThreshold = useCallback(() => {
-        return theme.analyzers.some((a) => a.score > theme.reporter.threshold);
-    }, [theme]);
+    const scoreCount = new ScoreCount(
+        theme.analyzers.length,
+        theme.analyzers.filter(
+            (a) => a.score > theme.reporter.threshold
+        ).length,
+        theme.analyzers.filter(
+            (a) => a.score <= theme.reporter.threshold
+        ).length,
+        theme.analyzers.filter((a) => a.score === 0).length
+    );
 
-    const borderColor = StatusColorMap[String(overThreshold())];
+    const borderColor = StatusColorMap[scoreCount.status()];
 
-    const statusTitle = StatusThemeTitleMap[String(overThreshold())];
+    const statusTitle = StatusThemeTitleMap[scoreCount.status()];
 
     const themeProcessing = theme.analyzers.some(
         (ta) => ta.status === "inprogress" || ta.status === "waiting"
@@ -173,19 +186,25 @@ function ThemeAccordion({ theme }: IThemeAccordion) {
     );
 }
 
-const StatusAnalysisColorMap: Record<string, string> = {
-    false: clsx(`text-emerald-700`),
-    true: clsx(`text-red-700`),
+const StatusAnalysisColorMap: Record<ScoreCountStatus, string> = {
+    GOOD: clsx(`text-emerald-700`),
+    BAD: clsx(`text-red-700`),
+    MIXED: clsx(`text-orange-700`),
+    NEUTRAL: clsx(`text-gray-700`),
 };
 
-const contentBorderColorMap: Record<string, string> = {
-    false: clsx(`border-emerald-400`),
-    true: clsx(`border-red-400`),
+const contentBorderColorMap: Record<ScoreCountStatus, string> = {
+    GOOD: clsx(`border-emerald-400`),
+    BAD: clsx(`border-red-400`),
+    MIXED: clsx(`border-orange-400`),
+    NEUTRAL: clsx(`border-gray-400`),
 };
 
-const StatusAnalysisMap: Record<string, string> = {
-    false: "Threshold not met.",
-    true: "Threshold met for content.",
+const StatusAnalysisMap: Record<ScoreCountStatus, string> = {
+    GOOD: "Analysis approved.",
+    BAD: "Analysis matches criteria.",
+    MIXED: "Analysis mixed for content.",
+    NEUTRAL: "Unreported analysis.",
 };
 
 type IAnalysisSection = {
@@ -193,11 +212,16 @@ type IAnalysisSection = {
     theme: ThemeResult;
 };
 function AnalysisSection({ analysis, theme }: IAnalysisSection) {
-    const overThreshold = analysis.score > theme.reporter.threshold;
-    const borderColor = StatusAnalysisColorMap[String(overThreshold)];
+    const scoreStatus = new ScoreCount(
+        1,
+        theme.reporter.threshold < analysis.score ? 1 : 0,
+        theme.reporter.threshold >= analysis.score ? 1 : 0,
+        analysis.score === 0 ? 1 : 0
+    );
+    const borderColor = StatusAnalysisColorMap[scoreStatus.status()];
 
-    const statusTitle = StatusAnalysisMap[String(overThreshold)];
-    const contentBorderColor = contentBorderColorMap[String(overThreshold)];
+    const statusTitle = StatusAnalysisMap[scoreStatus.status()];
+    const contentBorderColor = contentBorderColorMap[scoreStatus.status()];
 
     const isProcessing =
         analysis.status === "inprogress" || analysis.status === "waiting";

@@ -36,6 +36,7 @@ import {
     AnalysisRequestResultBasic,
     AnalysisStatus,
     GENRE_MAP,
+    ScoreCountStatus,
 } from "@/domain/analysis/type";
 import { useMediaQuery } from "@/lib/hooks/useMediaQuery.hook";
 import { cn } from "@/lib/utils";
@@ -298,10 +299,11 @@ const statusMap: Record<AnalysisStatus, ReactNode> = {
     finished: <p>Finished</p>,
 };
 
-const borderColorMap: Record<"good" | "bad" | "neutral", string> = {
-    good: clsx(`border-emerald-400 shadow-green-200`),
-    bad: clsx(`border-red-400 shadow-red-200`),
-    neutral: clsx(``),
+const borderColorMap: Record<ScoreCountStatus, string> = {
+    GOOD: clsx(`border-emerald-400 shadow-green-200`),
+    BAD: clsx(`border-red-400 shadow-red-200`),
+    MIXED: clsx(`border-orange-400 shadow-orange-200`),
+    NEUTRAL: clsx(`border-gray-400 shadow-gray-200`),
 };
 
 type IAnalysis = {
@@ -322,12 +324,9 @@ function AnalysisItem({ analysisRequest }: IAnalysis) {
 
     const borderColor = useCallback((): string => {
         if (analysisRequest.status == "finished") {
-            if (analysisRequest.overThreshold) {
-                return borderColorMap["bad"];
-            }
-            return borderColorMap["good"];
+            return borderColorMap[analysisRequest.scoreCount.status()];
         }
-        return borderColorMap["neutral"];
+        return clsx(``);
     }, [analysisRequest]);
 
     const isInProgress = analysisRequest.status === "inprogress";
@@ -406,12 +405,12 @@ function AnalysisItem({ analysisRequest }: IAnalysis) {
                 </Link>
             </ContextMenuTrigger>
             <ContextMenuContent>
-                {analysisRequest.overThreshold ? (
-                    <ContextMenuItem onClick={() => updateScore(-1)}>
+                {analysisRequest.scoreCount.status() !== "GOOD" ? (
+                    <ContextMenuItem onClick={() => updateScore(1)}>
                         <LuSmile /> Mark as Approved
                     </ContextMenuItem>
                 ) : (
-                    <ContextMenuItem onClick={() => updateScore(1)}>
+                    <ContextMenuItem onClick={() => updateScore(-1)}>
                         <LuFrown /> Mark as Flagged
                     </ContextMenuItem>
                 )}

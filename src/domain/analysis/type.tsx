@@ -2,6 +2,42 @@ export type AnalysisStatus = "waiting" | "inprogress" | "finished" | "error";
 export type ContentType = "book" | "movie" | "series" | "lyrics" | "other";
 export type RequestOrigin = "user" | "system" | "dataloom" | "external";
 
+export type ScoreCountStatus = "BAD" | "GOOD" | "MIXED" | "NEUTRAL";
+export class ScoreCount {
+    total: number;
+    overThreshold: number;
+    underThreshold: number;
+    zeroScoreCount: number;
+
+    constructor(
+        total: number,
+        overThreshold: number,
+        underThreshold: number,
+        zeroScoreCount: number
+    ) {
+        this.total = total;
+        this.overThreshold = overThreshold; // Good
+        this.underThreshold = underThreshold; // Bad
+        this.zeroScoreCount = zeroScoreCount; // Neutral
+    }
+
+    status(): ScoreCountStatus {
+        if (this.total === 0 || this.zeroScoreCount === this.total) {
+            return "NEUTRAL";
+        }
+
+        if (this.overThreshold === this.total) {
+            return "GOOD";
+        } else if (this.underThreshold === this.total) {
+            return "BAD";
+        } else if (this.overThreshold > 0 && this.underThreshold > 0) {
+            return "MIXED";
+        } else {
+            return "NEUTRAL";
+        }
+    }
+}
+
 // Analysis Request
 
 export type AnalysisRequest = {
@@ -105,7 +141,7 @@ export type AnalysisRequestResultBasic = {
     title: string;
     category: string;
     contentType: ContentType;
-    overThreshold: boolean;
+    scoreCount: ScoreCount;
     status: AnalysisStatus;
     percentageCompleted: number;
     createdAt: Date;

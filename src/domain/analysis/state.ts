@@ -1,5 +1,9 @@
 import { create } from "zustand";
-import { AnalysisRequestResult, AnalysisRequestResultBasic } from "./type";
+import {
+    AnalysisRequestResult,
+    AnalysisRequestResultBasic,
+    ScoreCount,
+} from "./type";
 
 type AnalysisStore = {
     analysisRequestResults: Array<AnalysisRequestResult>;
@@ -22,9 +26,17 @@ export const useAnalysisStore = create<AnalysisStore & AnalysisStoreActions>(
 export function mapToBasic(
     ar: AnalysisRequestResult
 ): AnalysisRequestResultBasic {
-    console.table(ar);
-    const overThreshold = ar.themes.some((t) =>
-        t.analyzers.some((a) => a.score > t.reporter.threshold)
+    const scoreCount = new ScoreCount(
+        ar.themes.flatMap((t) => t.analyzers).length,
+        ar.themes.flatMap((t) =>
+            t.analyzers.filter((a) => a.score > t.reporter.threshold)
+        ).length,
+        ar.themes.flatMap((t) =>
+            t.analyzers.filter((a) => a.score <= t.reporter.threshold)
+        ).length,
+        ar.themes.flatMap((t) =>
+            t.analyzers.filter((a) => a.score === 0)
+        ).length
     );
 
     const status = (() => {
@@ -59,7 +71,7 @@ export function mapToBasic(
         analysisIds: ar.themes.flatMap((t) => t.analyzers).flatMap((a) => a.id),
         title: ar.title,
         contentType: ar.contentType,
-        overThreshold: overThreshold,
+        scoreCount: scoreCount,
         status: status,
         percentageCompleted: percentageCompleted,
         createdAt: ar.createdAt,
