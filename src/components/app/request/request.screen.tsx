@@ -239,6 +239,11 @@ export default function RequestScreen({}: IRequestScreen) {
                             type='lyrics'
                             selected={ar.contentType == "lyrics"}
                         />
+                        <RequestType
+                            onClick={() => selectContentType("other")}
+                            type='other'
+                            selected={ar.contentType == "other"}
+                        />
                     </div>
                     <div className='flex flex-row gap-3'>
                         <Input

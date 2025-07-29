@@ -22,6 +22,7 @@ import {
     ThemeAnalyzer,
     ThemeAnalyzerInput,
     ThemeConfig,
+    ThemeReporter,
 } from "@/domain/theme/type";
 import { cn } from "@/lib/utils";
 import { TooltipProvider, TooltipTrigger } from "@radix-ui/react-tooltip";
@@ -91,6 +92,16 @@ export default function ThemeScreen({ themeConfigId }: IThemeScreen) {
         }));
     };
 
+    const updateReporterInTheme = (reporter: ThemeReporter) => {
+        setLocalTheme((prevState) => ({
+            ...prevState,
+            reporters: [
+                ...prevState.reporters.filter((rep) => rep.key != reporter.key),
+                reporter,
+            ],
+        }));
+    };
+
     const { invs } = useInvalidateQuery();
     const { back } = useGoBack();
 
@@ -153,6 +164,17 @@ export default function ThemeScreen({ themeConfigId }: IThemeScreen) {
         setErrors(valErrors);
     };
 
+    const activeReporter = useMemo(() => {
+        return localTheme.reporters.find(
+            (rep) =>
+                rep.changeStatus === "same" || rep.changeStatus === "changed"
+        );
+    }, [localTheme.reporters]);
+
+    const newReporters = useMemo(() => {
+        return localTheme.reporters.filter((rep) => rep.changeStatus === "new");
+    }, [localTheme.reporters]);
+
     const inUseAnalyzers = useMemo(() => {
         return localTheme.analyzers.filter(
             (analyzer) => analyzer.changeStatus !== "new"
@@ -167,7 +189,7 @@ export default function ThemeScreen({ themeConfigId }: IThemeScreen) {
 
     return (
         <TooltipProvider>
-            <div className='flex flex-1 grow flex-col max-w-2xl space-y-4 mb-24 mt-4 md:mt-16'>
+            <div className='flex flex-1 grow flex-col max-w-2xl space-y-4 mb-24 mt-4 md:mt-16 gap-4'>
                 <h2 className='text-2xl'>Theme Configuration</h2>
 
                 <div className='space-y-2'>
@@ -187,18 +209,20 @@ export default function ThemeScreen({ themeConfigId }: IThemeScreen) {
                         value={localTheme.description}
                         onChange={(e) => updateThemeDescription(e.target.value)}
                     />
-                    <span className='text-sm text-muted-foreground ml-3'>
-                        This name will be displayed when creating an Analysis
-                        Request
+                    <span className='text-sm font-light text-muted-foreground ml-3'>
+                        This name and description will be displayed when
+                        creating an Analysis Request
                     </span>
                 </div>
-                <div className='flex justify-end'>
-                    <AddAnalyzerSheet
-                        analyzers={newAnalyzers}
-                        addAnalyzer={updateAnalyzerInTheme}
-                    />
-                </div>
-                <div className='space-y-4'>
+
+                <div className='space-y-3'>
+                    <div className='flex justify-between items-center'>
+                        <div className='font-medium'>Selected Analyzers</div>
+                        <AddAnalyzerSheet
+                            analyzers={newAnalyzers}
+                            addAnalyzer={updateAnalyzerInTheme}
+                        />
+                    </div>
                     {inUseAnalyzers.length === 0 && (
                         <EmptyList title='No analyzers added yet.' />
                     )}
@@ -220,6 +244,25 @@ export default function ThemeScreen({ themeConfigId }: IThemeScreen) {
                             />
                         );
                     })}
+                </div>
+
+                <div className='space-y-3'>
+                    <div className='flex flex-row justify-between items-center'>
+                        <div className='font-medium'>Selected Reporter</div>
+                        <SelectReporterSheet
+                            reporters={newReporters}
+                            selectReporter={updateReporterInTheme}
+                        />
+                    </div>
+                    {activeReporter === undefined && (
+                        <EmptyList title='No reporter selected.' />
+                    )}
+                    {activeReporter && (
+                        <ReporterConfig
+                            reporter={activeReporter}
+                            updateReporter={updateReporterInTheme}
+                        />
+                    )}
                 </div>
                 <div className='flex justify-between items-center'>
                     <BackLink disabled={isPending}>
@@ -281,12 +324,118 @@ function AddAnalyzerSheet({ analyzers, addAnalyzer }: IAddAnalyzerSheet) {
     );
 }
 
+type ISelectReporterSheet = {
+    reporters: Array<ThemeReporter>;
+    selectReporter: (reporter: ThemeReporter) => void;
+};
+function SelectReporterSheet({
+    reporters,
+    selectReporter,
+}: ISelectReporterSheet) {
+    return (
+        <Sheet>
+            <SheetTrigger asChild>
+                <Button variant='outline' size='sm'>
+                    Select Reporter
+                </Button>
+            </SheetTrigger>
+            <SheetContent>
+                <SheetHeader>
+                    <SheetTitle>Available reporters:</SheetTitle>
+                    <div className='space-y-4'>
+                        {reporters.length === 0 && (
+                            <EmptyList title='No reporters left.' />
+                        )}
+                        {reporters.map((rep) => (
+                            <UnusedReporterConfig
+                                key={rep.key}
+                                selectReporter={selectReporter}
+                                reporterConfig={rep}
+                            />
+                        ))}
+                    </div>
+                </SheetHeader>
+            </SheetContent>
+        </Sheet>
+    );
+}
+
 const changeStatusStyles: Record<ChangeStatus, string> = {
     new: clsx`border-blue-400 text-blue-400`,
     changed: clsx`border-amber-400 text-amber-400`,
     removed: clsx`border-red-400 text-red-400`,
     same: clsx`opacity-0`,
 };
+
+type IReporterConfig = {
+    reporter: ThemeReporter;
+    updateReporter: (reporter: ThemeReporter) => void;
+};
+function ReporterConfig({ reporter, updateReporter }: IReporterConfig) {
+    const removeFromTheme = () => {
+        updateReporter({
+            ...reporter,
+            changeStatus: "new",
+            threshold: 0,
+        });
+    };
+
+    const updateThreshold = (threshold: number) => {
+        updateReporter({
+            ...reporter,
+            changeStatus: "changed",
+            threshold: threshold,
+        });
+    };
+
+    return (
+        <div className='p-4 rounded-xl border border-dashed border-blue-300 space-y-4'>
+            <div>
+                <div className='flex flex-row justify-between'>
+                    <div className='space-x-1'>
+                        <span className='text-xl font-medium'>
+                            {reporter.name}
+                        </span>
+                        <span className='text-xs text-muted-foreground'>
+                            Reporter
+                        </span>
+                    </div>
+                    <div>
+                        <span
+                            className={cn(
+                                "text-xs px-1 capitalize rounded-sm border",
+                                changeStatusStyles[reporter.changeStatus]
+                            )}
+                        >
+                            {reporter.changeStatus}
+                        </span>
+                    </div>
+                </div>
+                <p className='text-sm font-light text-muted-foreground'>
+                    {reporter.description}
+                </p>
+            </div>
+            <div className='space-y-3'>
+                <div className='flex space-x-3'>
+                    <Slider
+                        defaultValue={[0]}
+                        min={-1}
+                        max={1}
+                        step={0.01}
+                        value={[+reporter.threshold]}
+                        onValueChange={(e) => updateThreshold(e[0])}
+                    />
+                    <span className='text-sm'>{reporter.threshold}</span>
+                </div>
+            </div>
+            <div className='flex justify-end'>
+                <Button variant='cancel' size='sm' onClick={removeFromTheme}>
+                    Remove Reporter
+                </Button>
+            </div>
+        </div>
+    );
+}
 
 type IAnalyzerConfig = {
     analyzerConfig: ThemeAnalyzer;
@@ -531,11 +680,7 @@ function UnusedConfig({ analyzerConfig, addAnalyzer }: IUnusedConfig) {
         addAnalyzer({
             ...analyzerConfig,
             changeStatus: "changed",
-            inputs: analyzerConfig.inputs.map((ai) =>
-                ai.key === "threshold"
-                    ? { ...ai, value: "0", changeStatus: "changed" }
-                    : ai
-            ),
+            inputs: analyzerConfig.inputs,
         });
     };
 
@@ -559,6 +704,48 @@ function UnusedConfig({ analyzerConfig, addAnalyzer }: IUnusedConfig) {
             <div className='flex justify-end'>
                 <Button size='sm' onClick={addToTheme}>
                     Add Analyzer
+                </Button>
+            </div>
+        </div>
+    );
+}
+
+type IUnusedReporterConfig = {
+    reporterConfig: ThemeReporter;
+    selectReporter: (reporter: ThemeReporter) => void;
+};
+function UnusedReporterConfig({
+    reporterConfig,
+    selectReporter,
+}: IUnusedReporterConfig) {
+    const addToTheme = () => {
+        selectReporter({
+            ...reporterConfig,
+            changeStatus: "changed",
+            threshold: 0,
+        });
+    };
+
+    return (
+        <div className='p-4 rounded-xl border border-dashed border-blue-300 space-y-4'>
+            <div className='space-y-1'>
+                <div className='flex flex-row justify-between'>
+                    <div className='space-x-1'>
+                        <span className='text-lg font-medium'>
+                            {reporterConfig.name}
+                        </span>
+                        <span className='text-xs text-muted-foreground'>
+                            Reporter
+                        </span>
+                    </div>
+                </div>
+                <p className='text-sm font-light text-muted-foreground'>
+                    {reporterConfig.description}
+                </p>
+            </div>
+            <div className='flex justify-end'>
+                <Button size='sm' onClick={addToTheme}>
+                    Add Reporter
                 </Button>
             </div>
         </div>

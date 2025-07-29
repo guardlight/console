@@ -22,13 +22,10 @@ export const useAnalysisStore = create<AnalysisStore & AnalysisStoreActions>(
 export function mapToBasic(
     ar: AnalysisRequestResult
 ): AnalysisRequestResultBasic {
-    const overThreshold = ar.themes
-        .flatMap((t) => t.analyzers)
-        .some(
-            (a) =>
-                a.score >
-                +(a.inputs.find((i) => i.key === "threshold")?.value || "0")
-        );
+    console.table(ar);
+    const overThreshold = ar.themes.some((t) =>
+        t.analyzers.some((a) => a.score > t.reporter.threshold)
+    );
 
     const status = (() => {
         const analysisStatuses = ar.themes

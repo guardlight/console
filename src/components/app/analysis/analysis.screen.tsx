@@ -123,11 +123,7 @@ type IThemeAccordion = {
 };
 function ThemeAccordion({ theme }: IThemeAccordion) {
     const overThreshold = useCallback(() => {
-        return theme.analyzers.some(
-            (a) =>
-                a.score >
-                +(a.inputs.find((i) => i.key === "threshold")?.value || "0")
-        );
+        return theme.analyzers.some((a) => a.score > theme.reporter.threshold);
     }, [theme]);
 
     const borderColor = StatusColorMap[String(overThreshold())];
@@ -165,7 +161,11 @@ function ThemeAccordion({ theme }: IThemeAccordion) {
                 </AccordionTrigger>
                 <AccordionContent className='space-y-4'>
                     {theme.analyzers.map((a) => (
-                        <AnalysisSection key={a.key} analysis={a} />
+                        <AnalysisSection
+                            key={a.key}
+                            analysis={a}
+                            theme={theme}
+                        />
                     ))}
                 </AccordionContent>
             </AccordionItem>
@@ -190,11 +190,10 @@ const StatusAnalysisMap: Record<string, string> = {
 
 type IAnalysisSection = {
     analysis: AnalyzerResult;
+    theme: ThemeResult;
 };
-function AnalysisSection({ analysis }: IAnalysisSection) {
-    const overThreshold =
-        analysis.score >
-        +(analysis.inputs.find((i) => i.key === "threshold")?.value || "0");
+function AnalysisSection({ analysis, theme }: IAnalysisSection) {
+    const overThreshold = analysis.score > theme.reporter.threshold;
     const borderColor = StatusAnalysisColorMap[String(overThreshold)];
 
     const statusTitle = StatusAnalysisMap[String(overThreshold)];

@@ -1,5 +1,5 @@
 export type AnalysisStatus = "waiting" | "inprogress" | "finished" | "error";
-export type ContentType = "book" | "movie" | "series" | "lyrics";
+export type ContentType = "book" | "movie" | "series" | "lyrics" | "other";
 export type RequestOrigin = "user" | "system" | "dataloom" | "external";
 
 // Analysis Request
@@ -58,6 +58,12 @@ export type ThemeResult = {
     id: string;
     title: string;
     analyzers: Array<AnalyzerResult>;
+    reporter: Reporter;
+};
+
+export type Reporter = {
+    threshold: number;
+    comments: string;
 };
 
 export type AnalyzerResult = {
@@ -187,4 +193,5 @@ export const GENRE_MAP: Record<string, Array<string>> = {
         "Classical",
         "Dance",
     ],
+    other: ["Documents", "Papers", "Other"],
 };

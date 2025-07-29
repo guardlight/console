@@ -7,37 +7,37 @@ export const mockAnalysisApi = (mock: MockAdapter) => {
         return new Promise((resolve, _) => {
             setTimeout(function () {
                 const random = Math.random();
-                if (random < 1 / 3) {
-                    resolve([
-                        200,
-                        {
-                            analyses: ANALYSES,
-                            limit: 6,
-                            page: 1,
-                            totalPages: 1,
-                        } as AnalysisRequestResultPaginated,
-                    ]);
-                } else if (random < 2 / 3) {
-                    resolve([
-                        200,
-                        {
-                            analyses: [],
-                            limit: 6,
-                            page: 0,
-                            totalPages: 1,
-                        } as AnalysisRequestResultPaginated,
-                    ]);
-                } else {
-                    resolve([
-                        500,
-                        {
-                            analyses: [],
-                            limit: 6,
-                            page: 0,
-                            totalPages: 1,
-                        } as AnalysisRequestResultPaginated,
-                    ]);
-                }
+                // if (random < 1 / 3) {
+                resolve([
+                    200,
+                    {
+                        analyses: ANALYSES,
+                        limit: 6,
+                        page: 1,
+                        totalPages: 1,
+                    } as AnalysisRequestResultPaginated,
+                ]);
+                // } else if (random < 2 / 3) {
+                //     resolve([
+                //         200,
+                //         {
+                //             analyses: [],
+                //             limit: 6,
+                //             page: 0,
+                //             totalPages: 1,
+                //         } as AnalysisRequestResultPaginated,
+                //     ]);
+                // } else {
+                //     resolve([
+                //         500,
+                //         {
+                //             analyses: [],
+                //             limit: 6,
+                //             page: 0,
+                //             totalPages: 1,
+                //         } as AnalysisRequestResultPaginated,
+                //     ]);
+                // }
             }, 1000);
         });
     });
@@ -110,6 +110,10 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
             {
                 id: "25681972-0638-4a8d-8144-105b403456cd",
                 title: "Acts of Violence",
+                reporter: {
+                    comments: "",
+                    threshold: 0,
+                },
                 analyzers: [
                     {
                         id: "5a1abc7a-c098-4a67-a796-cdf17e73b282",
@@ -123,11 +127,6 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
                                 key: "strict_words",
                                 name: "Strict Words",
                                 value: "Fighting, Walking",
-                            },
-                            {
-                                key: "threshold",
-                                name: "Threshold",
-                                value: "0.9",
                             },
                         ],
                         jobs: [
@@ -152,11 +151,6 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
                                 name: "Contextual Words",
                                 value: "Fighting, Walking",
                             },
-                            {
-                                key: "threshold",
-                                name: "Threshold",
-                                value: "0.9",
-                            },
                         ],
                         jobs: [
                             {
@@ -172,6 +166,10 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
             {
                 id: "d3be4fb5-9345-42d3-8d1a-ba7b3680d75e",
                 title: "Relegious Sensitivity",
+                reporter: {
+                    comments: "",
+                    threshold: 0,
+                },
                 analyzers: [
                     {
                         id: "dabffa63-d115-450a-9d6d-1c3feaa80cdf",
@@ -185,11 +183,6 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
                                 key: "strict_words",
                                 name: "Strict Words",
                                 value: "Fighting, Walking",
-                            },
-                            {
-                                key: "threshold",
-                                name: "Threshold",
-                                value: "0.9",
                             },
                         ],
                         jobs: [
@@ -216,6 +209,10 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
             {
                 id: "25681972-0638-4a8d-8144-105b403456cd",
                 title: "Acts of Violence",
+                reporter: {
+                    comments: "",
+                    threshold: 0,
+                },
                 analyzers: [
                     {
                         id: "8e1f8e9f-5522-491f-8440-88d25a66723d",
@@ -229,11 +226,6 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
                                 key: "strict_words",
                                 name: "Strict Words",
                                 value: "Fighting, Walking",
-                            },
-                            {
-                                key: "threshold",
-                                name: "Threshold",
-                                value: "0.9",
                             },
                         ],
                         jobs: [
@@ -260,11 +252,6 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
                                 name: "Contextual Words",
                                 value: "Fighting, Walking",
                             },
-                            {
-                                key: "threshold",
-                                name: "Threshold",
-                                value: "0.9",
-                            },
                         ],
                         jobs: [
                             {
@@ -280,6 +267,10 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
             {
                 id: "c5770399-dec1-4065-bd3d-8ebab9893a7a",
                 title: "Relegious Sensitivity",
+                reporter: {
+                    comments: "",
+                    threshold: 0,
+                },
                 analyzers: [
                     {
                         id: "8dd7251b-f6d4-4247-8379-38c0c0c20f75",
@@ -298,11 +289,6 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
                                 key: "strict_words",
                                 name: "Strict Words",
                                 value: "Lords",
-                            },
-                            {
-                                key: "threshold",
-                                name: "Threshold",
-                                value: "0.2",
                             },
                         ],
                         jobs: [
@@ -329,11 +315,6 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
                                 name: "Contextual Words",
                                 value: "Fighting, Walking",
                             },
-                            {
-                                key: "threshold",
-                                name: "Threshold",
-                                value: "0.9",
-                            },
                         ],
                         jobs: [
                             {
@@ -359,6 +340,10 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
             {
                 id: "25681972-0638-4a8d-8144-105b403456cd",
                 title: "Acts of Violence",
+                reporter: {
+                    comments: "",
+                    threshold: 0,
+                },
                 analyzers: [
                     {
                         id: "26f24b8d-70ff-4ba3-8fea-a9d70bd8428c",
@@ -372,11 +357,6 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
                                 key: "strict_words",
                                 name: "Strict Words",
                                 value: "Fighting, Walking",
-                            },
-                            {
-                                key: "threshold",
-                                name: "Threshold",
-                                value: "0.6",
                             },
                         ],
                         jobs: [
@@ -403,6 +383,10 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
             {
                 id: "25681972-0638-4a8d-8144-105b403456cd",
                 title: "Acts of Violence",
+                reporter: {
+                    comments: "",
+                    threshold: 0,
+                },
                 analyzers: [
                     {
                         id: "466c6043-b08d-4e3e-8e83-29e8b211ceb9",
@@ -418,11 +402,6 @@ export const ANALYSES: Array<AnalysisRequestResult> = [
                                 key: "strict_words",
                                 name: "Strict Words",
                                 value: "Fighting, Walking",
-                            },
-                            {
-                                key: "threshold",
-                                name: "Threshold",
-                                value: "0",
                             },
                         ],
                         jobs: [

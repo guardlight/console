@@ -48,6 +48,15 @@ const THEME_CONFIGS: ThemeConfig[] = [
         id: NIL_UUID,
         title: "",
         description: "",
+        reporters: [
+            {
+                key: "basic_reporter",
+                threshold: 0,
+                changeStatus: "new",
+                description: "Basic reporter that will check basic counts.",
+                name: "Word Count",
+            },
+        ],
         analyzers: [
             {
                 key: "word_search",
@@ -64,15 +73,6 @@ const THEME_CONFIGS: ThemeConfig[] = [
                             "Words in this list will immediatly flag the content. Seperate words or phrases with a comma (,)",
                         name: "Strict Words",
                         type: "textarea",
-                    },
-                    {
-                        key: "threshold",
-                        value: "",
-                        changeStatus: "new",
-                        description:
-                            "The value that will be used to measure against.",
-                        name: "Threshold",
-                        type: "threshold",
                     },
                 ],
             },
@@ -92,15 +92,6 @@ const THEME_CONFIGS: ThemeConfig[] = [
                         name: "Contextual Words",
                         type: "textarea",
                     },
-                    {
-                        key: "threshold",
-                        value: "",
-                        changeStatus: "new",
-                        description:
-                            "The value that will be used to measure against.",
-                        name: "Threshold",
-                        type: "threshold",
-                    },
                 ],
             },
         ],
@@ -110,6 +101,15 @@ const THEME_CONFIGS: ThemeConfig[] = [
         title: "Acts of Violence",
         description:
             "This theme focuses on identifying content that may depict or promote acts of violence. It uses various analyzers to detect violent language, sentiment, or other indicators that suggest violent behavior or intent.",
+        reporters: [
+            {
+                key: "basic_reporter",
+                threshold: 0,
+                changeStatus: "new",
+                description: "Basic reporter that will check basic counts.",
+                name: "Word Count",
+            },
+        ],
         analyzers: [
             {
                 key: "word_search",
@@ -126,15 +126,6 @@ const THEME_CONFIGS: ThemeConfig[] = [
                             "Words in this list will immediatly flag the content.",
                         name: "Strict Words",
                         type: "textarea",
-                    },
-                    {
-                        key: "threshold",
-                        value: "",
-                        changeStatus: "new",
-                        description:
-                            "The value that will be used to measure against.",
-                        name: "Threshold",
-                        type: "threshold",
                     },
                 ],
             },
@@ -153,15 +144,6 @@ const THEME_CONFIGS: ThemeConfig[] = [
                             "Words or phrases in this list will be scanned to check if it is positive, negative or neutral.",
                         name: "Contextual Words",
                         type: "textarea",
-                    },
-                    {
-                        key: "threshold",
-                        value: "",
-                        changeStatus: "removed",
-                        description:
-                            "The value that will be used to measure against.",
-                        name: "Threshold",
-                        type: "threshold",
                     },
                 ],
             },
@@ -189,12 +171,30 @@ const THEME_CONFIGS: ThemeConfig[] = [
         description:
             "This theme is designed to identify content that may be offensive or insensitive to religious beliefs and practices. It aims to ensure that media content respects diverse religious perspectives and avoids promoting intolerance or discrimination.",
         analyzers: [],
+        reporters: [
+            {
+                key: "basic_reporter",
+                threshold: 1,
+                changeStatus: "same",
+                description: "Basic reporter that will check basic counts.",
+                name: "Word Count",
+            },
+        ],
     },
     {
         id: "0124384c-dacf-45f5-a294-e435dced3f86",
         title: "Usable Theme",
         description:
             "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
+        reporters: [
+            {
+                key: "basic_reporter",
+                threshold: 0,
+                changeStatus: "new",
+                description: "Basic reporter that will check basic counts.",
+                name: "Word Count",
+            },
+        ],
         analyzers: [
             {
                 key: "word_search",
@@ -211,15 +211,6 @@ const THEME_CONFIGS: ThemeConfig[] = [
                             "Words in this list will immediatly flag the content. Seperate words or phrases with a comma (,)",
                         name: "Strict Words",
                         type: "textarea",
-                    },
-                    {
-                        key: "threshold",
-                        value: "0.1",
-                        changeStatus: "same",
-                        description:
-                            "The value that will be used to measure against.",
-                        name: "Threshold",
-                        type: "threshold",
                     },
                 ],
             },
@@ -238,15 +229,6 @@ const THEME_CONFIGS: ThemeConfig[] = [
                             "Words or phrases in this list will be scanned to check if it is positive, negative or neutral.",
                         name: "Contextual Words",
                         type: "textarea",
-                    },
-                    {
-                        key: "threshold",
-                        value: "0.25",
-                        changeStatus: "same",
-                        description:
-                            "The value that will be used to measure against.",
-                        name: "Threshold",
-                        type: "threshold",
                     },
                 ],
             },

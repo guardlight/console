@@ -7,6 +7,7 @@ export type ThemeConfig = {
     title: string;
     description: string;
     analyzers: Array<ThemeAnalyzer>;
+    reporters: Array<ThemeReporter>;
 };
 
 export type ThemeAnalyzer = {
@@ -26,11 +27,20 @@ export type ThemeAnalyzerInput = {
     changeStatus: ChangeStatus;
 };
 
+export type ThemeReporter = {
+    key: string;
+    threshold: number;
+    name: string;
+    description: string;
+    changeStatus: ChangeStatus;
+};
+
 export const NIL_THEME_CONFIG: ThemeConfig = {
     id: NIL_UUID,
     title: "",
     description: "",
     analyzers: [],
+    reporters: [],
 };
 
 export type ThemeConfigCreateResponse = {};
