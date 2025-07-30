@@ -82,7 +82,12 @@ function RouteComponent() {
                 ) {
                     await sleep(500);
                     invs(
-                        AnalysisKeys.analyses(1, undefined, undefined).queryKey
+                        AnalysisKeys.analyses(
+                            1,
+                            undefined,
+                            undefined,
+                            undefined
+                        ).queryKey
                     );
                 }
             }
