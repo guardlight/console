@@ -108,9 +108,11 @@ export default function AnalysisScreen({ analysisId }: IAnalysisScreen) {
                         : []
                 }
             >
-                {analysisResult.themes.map((t) => (
-                    <ThemeAccordion key={t.id} theme={t} />
-                ))}
+                {analysisResult.themes
+                    .sort((a, b) => a.title.localeCompare(b.title))
+                    .map((t) => (
+                        <ThemeAccordion key={t.id} theme={t} />
+                    ))}
             </Accordion>
         </PageWrapper>
     );
