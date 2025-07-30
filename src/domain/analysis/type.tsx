@@ -3,6 +3,12 @@ export type ContentType = "book" | "movie" | "series" | "lyrics" | "other";
 export type RequestOrigin = "user" | "system" | "dataloom" | "external";
 
 export type ScoreCountStatus = "BAD" | "GOOD" | "MIXED" | "NEUTRAL";
+export const ScoreCountStatusValues: Array<ScoreCountStatus> = [
+    "GOOD",
+    "MIXED",
+    "BAD",
+    "NEUTRAL",
+];
 export class ScoreCount {
     total: number;
     overThreshold: number;

@@ -5,6 +5,7 @@ type AnalysisSearch = {
     page: number;
     query?: string | undefined;
     category?: string | undefined;
+    score?: string | undefined;
 };
 
 export const Route = createFileRoute("/_app/")({
@@ -14,10 +15,13 @@ export const Route = createFileRoute("/_app/")({
             page: Number(search?.page ?? 1),
             query: search.query as string as AnalysisSearch["query"],
             category: search.category as AnalysisSearch["category"],
+            score: search.score as AnalysisSearch["score"],
         };
     },
     search: {
-        middlewares: [retainSearchParams(["page", "query", "category"])],
+        middlewares: [
+            retainSearchParams(["page", "query", "category", "score"]),
+        ],
     },
 });
 

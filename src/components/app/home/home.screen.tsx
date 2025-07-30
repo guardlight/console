@@ -37,6 +37,7 @@ import {
     AnalysisStatus,
     GENRE_MAP,
     ScoreCountStatus,
+    ScoreCountStatusValues,
 } from "@/domain/analysis/type";
 import { useMediaQuery } from "@/lib/hooks/useMediaQuery.hook";
 import { cn } from "@/lib/utils";
@@ -128,12 +129,12 @@ const generatePages = (current: number, total: number, siblings: number) => {
 
 type IAnalysesLoading = {};
 function AnalysesLoading({}: IAnalysesLoading) {
-    const { page, category, query } = useSearch({ from: "/_app/" });
+    const { page, category, query, score } = useSearch({ from: "/_app/" });
     const navigate = useNavigate({ from: "/" });
     const [queryStr, setQueryStr] = useState(query || "");
 
     const { data, isLoading, error } = useQuery(
-        AnalysisKeys.analyses(page, category, query)
+        AnalysisKeys.analyses(page, category, query, score)
     );
 
     const isDesktop = useMediaQuery("(min-width: 767px)");
@@ -151,12 +152,12 @@ function AnalysesLoading({}: IAnalysesLoading) {
     const { invs } = useInvalidateQuery();
 
     useEffect(() => {
-        invs(AnalysisKeys.analyses(page, category, query).queryKey);
-    }, [page, category, query]);
+        invs(AnalysisKeys.analyses(page, category, query, score).queryKey);
+    }, [page, category, query, score]);
 
     const getPaginationItems = useCallback(
         () => generatePages(page, data?.totalPages || 1, 1),
-        [page, category, query, data]
+        [page, category, query, score, data]
     );
 
     if (isLoading) return <DataLoaderSpinner title='Loading your analyses.' />;
@@ -165,7 +166,9 @@ function AnalysesLoading({}: IAnalysesLoading) {
         return (
             <ErrorSoftner
                 title="Couldn't load your analyses."
-                queryKeys={AnalysisKeys.analyses(1, category, query).queryKey}
+                queryKeys={
+                    AnalysisKeys.analyses(1, category, query, score).queryKey
+                }
             />
         );
 
@@ -194,6 +197,16 @@ function AnalysesLoading({}: IAnalysesLoading) {
         });
     };
 
+    const selectScore = (sc: string) => {
+        navigate({
+            search: (prev) => ({
+                ...prev,
+                score: sc === "allscore" ? undefined : sc,
+                page: 1,
+            }),
+        });
+    };
+
     const updateSearchQuery = (query: string) => {
         setQueryStr(query);
         debouncedQuery(query);
@@ -206,7 +219,7 @@ function AnalysesLoading({}: IAnalysesLoading) {
                     placeholder={`Search for analysis request`}
                     onChange={(e) => updateSearchQuery(e.target.value)}
                     value={queryStr}
-                    className='rounded-xl basis-9/12'
+                    className='rounded-xl basis-7/12'
                 />
                 <Select
                     onValueChange={(cat) => selectCategory(cat)}
@@ -217,7 +230,7 @@ function AnalysesLoading({}: IAnalysesLoading) {
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem key='all:All' value='all:All'>
-                            All
+                            All categories
                         </SelectItem>
                         {Object.keys(GENRE_MAP).map((gkey) => (
                             <SelectGroup key={gkey}>
@@ -233,6 +246,28 @@ function AnalysesLoading({}: IAnalysesLoading) {
                                     </SelectItem>
                                 ))}
                             </SelectGroup>
+                        ))}
+                    </SelectContent>
+                </Select>
+                <Select
+                    onValueChange={(sc) => selectScore(sc)}
+                    defaultValue={score}
+                >
+                    <SelectTrigger className='rounded-xl basis-2/12'>
+                        <SelectValue placeholder='Select a score' />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem key='allscore' value='allscore'>
+                            All scores
+                        </SelectItem>
+                        {ScoreCountStatusValues.map((sckStatus) => (
+                            <SelectItem
+                                key={sckStatus}
+                                value={sckStatus}
+                                className='capitalize'
+                            >
+                                {sckStatus.toLowerCase()}
+                            </SelectItem>
                         ))}
                     </SelectContent>
                 </Select>
@@ -311,7 +346,12 @@ type IAnalysis = {
 };
 function AnalysisItem({ analysisRequest }: IAnalysis) {
     const { invs } = useInvalidateQuery();
-    const { page, category, query } = useSearch({ from: "/_app/" });
+    const {
+        page,
+        category,
+        query,
+        score: scoreCrit,
+    } = useSearch({ from: "/_app/" });
 
     const status = useCallback((): ReactNode => {
         return statusMap[analysisRequest.status];
@@ -342,7 +382,10 @@ function AnalysisItem({ analysisRequest }: IAnalysis) {
             .then(
                 axios.spread((_) => {
                     toast.success("Analysis Updated");
-                    invs(AnalysisKeys.analyses(page, category, query).queryKey);
+                    invs(
+                        AnalysisKeys.analyses(page, category, query, scoreCrit)
+                            .queryKey
+                    );
                 })
             );
     };
@@ -351,7 +394,9 @@ function AnalysisItem({ analysisRequest }: IAnalysis) {
         mutationFn: () => AnalysisApi.deleteAnalysisRequest(analysisRequest.id),
         onSuccess: () => {
             toast.success("Analysis Deleted");
-            invs(AnalysisKeys.analyses(page, category, query).queryKey);
+            invs(
+                AnalysisKeys.analyses(page, category, query, scoreCrit).queryKey
+            );
         },
         onError: (_) => {
             toast.error("Analysis not Deleted. Please try again");

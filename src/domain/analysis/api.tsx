@@ -11,11 +11,12 @@ export const AnalysisApi = {
     getAnalyses: (
         page: number,
         category: string | undefined,
-        query: string | undefined
+        query: string | undefined,
+        score: string | undefined
     ) =>
         axiosInstance
             .get<AnalysisRequestResultPaginated>(
-                `/analysis?limit=6&page=${page}&category=${category || ""}&query=${query || ""}`
+                `/analysis?limit=6&page=${page}&category=${category || ""}&query=${query || ""}&score=${score || ""}`
             )
             .then(handleResponse)
             .catch(handleError),
@@ -46,11 +47,13 @@ export const AnalysisKeys = {
     analyses: (
         page: number,
         category: string | undefined,
-        query: string | undefined
+        query: string | undefined,
+        score: string | undefined
     ) =>
         queryOptions({
             queryKey: ["analyses", page],
-            queryFn: () => AnalysisApi.getAnalyses(page, category, query),
+            queryFn: () =>
+                AnalysisApi.getAnalyses(page, category, query, score),
             refetchOnWindowFocus: false,
             retry: 0, // remove
             refetchOnMount: false,
