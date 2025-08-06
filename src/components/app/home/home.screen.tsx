@@ -53,7 +53,7 @@ import { useDebouncedCallback } from "use-debounce";
 type IHomeScreen = {};
 export function HomeScreen({}: IHomeScreen) {
     return (
-        <div className='flex flex-1 grow flex-col max-w-2xl space-y-5 mt-4 md:mt-24'>
+        <div className='flex flex-1 grow flex-col max-w-2xl space-y-5 mt-4 md:mt-24 mb-5'>
             <div className='md:flex md:justify-end gap-2'>
                 {/* <Button
                     variant='ghost'
@@ -214,63 +214,65 @@ function AnalysesLoading({}: IAnalysesLoading) {
 
     return (
         <div className='space-y-4'>
-            <div className='flex flex-row gap-3'>
+            <div className='flex flex-col md:flex-row gap-3'>
                 <Input
                     placeholder={`Search for analysis request`}
                     onChange={(e) => updateSearchQuery(e.target.value)}
                     value={queryStr}
-                    className='rounded-xl basis-7/12'
+                    className='rounded-xl basis-1 md:basis-7/12'
                 />
-                <Select
-                    onValueChange={(cat) => selectCategory(cat)}
-                    defaultValue={category}
-                >
-                    <SelectTrigger className='rounded-xl basis-3/12'>
-                        <SelectValue placeholder='Select a genre' />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem key='all:All' value='all:All'>
-                            All categories
-                        </SelectItem>
-                        {Object.keys(GENRE_MAP).map((gkey) => (
-                            <SelectGroup key={gkey}>
-                                <SelectLabel className='capitalize'>
-                                    {gkey}
-                                </SelectLabel>
-                                {GENRE_MAP[gkey].map((cat) => (
-                                    <SelectItem
-                                        key={`${gkey}:${cat}`}
-                                        value={`${gkey}:${cat}`}
-                                    >
-                                        {cat}
-                                    </SelectItem>
-                                ))}
-                            </SelectGroup>
-                        ))}
-                    </SelectContent>
-                </Select>
-                <Select
-                    onValueChange={(sc) => selectScore(sc)}
-                    defaultValue={score}
-                >
-                    <SelectTrigger className='rounded-xl basis-2/12'>
-                        <SelectValue placeholder='Select a score' />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem key='allscore' value='allscore'>
-                            All scores
-                        </SelectItem>
-                        {ScoreCountStatusValues.map((sckStatus) => (
-                            <SelectItem
-                                key={sckStatus}
-                                value={sckStatus}
-                                className='capitalize'
-                            >
-                                {sckStatus.toLowerCase()}
+                <div className='flex flex-row gap-3 justify-evenly basis-1 md:basis-5/12'>
+                    <Select
+                        onValueChange={(cat) => selectCategory(cat)}
+                        defaultValue={category}
+                    >
+                        <SelectTrigger className='rounded-xl w-full'>
+                            <SelectValue placeholder='Select a genre' />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem key='all:All' value='all:All'>
+                                All categories
                             </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+                            {Object.keys(GENRE_MAP).map((gkey) => (
+                                <SelectGroup key={gkey}>
+                                    <SelectLabel className='capitalize'>
+                                        {gkey}
+                                    </SelectLabel>
+                                    {GENRE_MAP[gkey].map((cat) => (
+                                        <SelectItem
+                                            key={`${gkey}:${cat}`}
+                                            value={`${gkey}:${cat}`}
+                                        >
+                                            {cat}
+                                        </SelectItem>
+                                    ))}
+                                </SelectGroup>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <Select
+                        onValueChange={(sc) => selectScore(sc)}
+                        defaultValue={score}
+                    >
+                        <SelectTrigger className='rounded-xl w-full'>
+                            <SelectValue placeholder='Select a score' />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem key='allscore' value='allscore'>
+                                All scores
+                            </SelectItem>
+                            {ScoreCountStatusValues.map((sckStatus) => (
+                                <SelectItem
+                                    key={sckStatus}
+                                    value={sckStatus}
+                                    className='capitalize'
+                                >
+                                    {sckStatus.toLowerCase()}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
             </div>
             <div className='flex flex-1 flex-col space-y-3'>
                 {data.analyses.length === 0 && (

@@ -114,7 +114,7 @@ type IHeader = {
 };
 function Header({ serverDisconnected }: IHeader) {
     return (
-        <div className='flex justify-between items-center p-4 mx-2 md:mx-4 sticky top-0 backdrop-blur-xs border-b-1 border-dashed'>
+        <div className='flex justify-between items-center p-4 mx-2 md:mx-4 sticky top-0 backdrop-blur-xs border-b-1 border-dashed z-50'>
             <div className='text-3xl font-bold'>Guardlight</div>
             <div className='space-x-4'>
                 {serverDisconnected && <RealtimeConnectionFailed />}
