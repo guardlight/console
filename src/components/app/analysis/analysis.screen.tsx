@@ -228,6 +228,8 @@ function AnalysisSection({ analysis, theme }: IAnalysisSection) {
     const isProcessing =
         analysis.status === "inprogress" || analysis.status === "waiting";
 
+    const isError = analysis.status === "error";
+
     return (
         <div className='space-y-3 pl-2 pr-14'>
             <div className='w-full'>
@@ -282,7 +284,13 @@ function AnalysisSection({ analysis, theme }: IAnalysisSection) {
                 <div className='size-[1px] bg-gray-300 rounded-4xl w-full ' />
             </div>
 
-            {isProcessing ? (
+            {isError ? (
+                <>
+                    <p className='text-muted-foreground font-light ml-2'>
+                        Error occured during analysis.
+                    </p>
+                </>
+            ) : isProcessing ? (
                 <div className='flex items-center gap-1 text-muted-foreground animate-pulse ml-2'>
                     <LuLoaderCircle className='animate-spin' />
                     <span className='text-muted-foreground font-light'>

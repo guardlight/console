@@ -329,7 +329,7 @@ function AnalysesLoading({}: IAnalysesLoading) {
 
 const statusMap: Record<AnalysisStatus, ReactNode> = {
     waiting: <p>Waiting</p>,
-    error: <p className='text-red-400'>Error</p>,
+    error: <p>Error</p>,
     inprogress: <p>In Progress</p>,
     finished: <p>Finished</p>,
 };
@@ -354,6 +354,12 @@ function AnalysisItem({ analysisRequest }: IAnalysis) {
     } = useSearch({ from: "/_app/" });
 
     const status = useCallback((): ReactNode => {
+        if (
+            analysisRequest.status === "finished" &&
+            analysisRequest.scoreCount.status() === "NEUTRAL"
+        ) {
+            return <p>Reporting</p>;
+        }
         return statusMap[analysisRequest.status];
     }, [analysisRequest]);
 
@@ -363,8 +369,10 @@ function AnalysisItem({ analysisRequest }: IAnalysis) {
     }, [analysisRequest]);
 
     const borderColor = useCallback((): string => {
-        if (analysisRequest.status == "finished") {
+        if (analysisRequest.status === "finished") {
             return borderColorMap[analysisRequest.scoreCount.status()];
+        } else if (analysisRequest.status === "error") {
+            return clsx(`border-gray-400 shadow-gray-200`);
         }
         return clsx(``);
     }, [analysisRequest]);
