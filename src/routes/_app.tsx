@@ -1,19 +1,21 @@
 import SomethingBrokeScreen from "@/components/app/Broke.screen";
 import { setStoredUser } from "@/components/auth/storage";
 import { EVENT_AUTHENTICATION_LOGOUT } from "@/components/const/const";
+import { Button } from "@/components/ui/button";
 import useInvalidateQuery from "@/components/ui/custom/Invalidate.hook";
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { AnalysisKeys } from "@/domain/analysis/api";
 import { ParserKeys } from "@/domain/parser/api";
 import { ThemeKeys } from "@/domain/theme/api";
 import { usePrefetchQuery } from "@tanstack/react-query";
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import {
+    createFileRoute,
+    Link,
+    Outlet,
+    redirect,
+    useRouterState,
+} from "@tanstack/react-router";
+import { useEffect } from "react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app")({
     beforeLoad: ({ context }) => {
@@ -35,7 +37,6 @@ type Event = {
 
 function RouteComponent() {
     const { invs } = useInvalidateQuery();
-    const [serverDisconnected, setServerDisconnected] = useState(false);
 
     useEffect(() => {
         const navigateToLogin = () => {
@@ -60,10 +61,21 @@ function RouteComponent() {
             withCredentials: true,
         });
 
-        es.onopen = () => setServerDisconnected(false);
+        es.onopen = () => {
+            toast.info("Realtime Connection Established", {
+                id: "sse-connection-event",
+                duration: 2000,
+                description: "",
+            });
+        };
 
         es.onerror = () => {
-            setServerDisconnected(true);
+            toast.error("Realtime Connection Failed", {
+                description:
+                    "You will not be able to recevie realtime updates from the server. Please refresh your page to connect again.",
+                id: "sse-connection-event",
+                duration: Infinity,
+            });
         };
 
         es.onmessage = (e) => handleMessage(e);
@@ -99,7 +111,7 @@ function RouteComponent() {
 
     return (
         <div>
-            <Header serverDisconnected={serverDisconnected} />
+            <Header />
             <div className='flex flex-1 px-4 md:px-0 justify-center'>
                 <Outlet />
             </div>
@@ -109,38 +121,42 @@ function RouteComponent() {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-type IHeader = {
-    serverDisconnected: boolean;
-};
-function Header({ serverDisconnected }: IHeader) {
+type IHeader = {};
+function Header({}: IHeader) {
     return (
         <div className='flex justify-between items-center p-4 mx-2 md:mx-4 sticky top-0 backdrop-blur-xs border-b-1 border-dashed z-50'>
             <div className='text-3xl font-bold'>Guardlight</div>
-            <div className='space-x-4'>
-                {serverDisconnected && <RealtimeConnectionFailed />}
-                {/* <Button variant='outline'>Settings</Button> */}
+            <div className='space-x-4 flex flex-row gap-2'>
+                <Menu />
             </div>
         </div>
     );
 }
 
-function RealtimeConnectionFailed() {
+function Menu() {
+    const location = useRouterState({ select: (s) => s.location });
+
     return (
-        <TooltipProvider>
-            <Tooltip>
-                <TooltipTrigger>
-                    <div className='px-2 py-1 border border-amber-400 rounded-md text-amber-500'>
-                        Realtime Connection Failed
-                    </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                    <p className='w-56'>
-                        You will not be able to recevie realtime updates from
-                        the server.
-                    </p>
-                    <p>Please refresh your page to connect again.</p>
-                </TooltipContent>
-            </Tooltip>
-        </TooltipProvider>
+        <div>
+            {location.pathname === "/" &&
+                import.meta.env.VITE_DATALOOM_URL !== "GL_DATALOOM_URL" && (
+                    <Link to={"/dataloom"}>
+                        <Button variant='link' className='px-4'>
+                            <span className='flex flex-row gap-3'>
+                                Guardlight Dataloom
+                            </span>
+                        </Button>
+                    </Link>
+                )}
+            {location.pathname.startsWith("/dataloom") && (
+                <Link to={"/"} search={{ page: 1 }}>
+                    <Button variant='link' className='px-4'>
+                        <span className='flex flex-row gap-3'>
+                            Guardlight Analyses
+                        </span>
+                    </Button>
+                </Link>
+            )}
+        </div>
     );
 }

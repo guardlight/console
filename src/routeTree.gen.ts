@@ -15,8 +15,13 @@ import { Route as LoginImport } from './routes/login'
 import { Route as AppImport } from './routes/_app'
 import { Route as AppIndexImport } from './routes/_app/index'
 import { Route as AppRequestImport } from './routes/_app/request'
+import { Route as AppDataloomRouteImport } from './routes/_app/dataloom/route'
 import { Route as AppThemeIndexImport } from './routes/_app/theme/index'
+import { Route as AppDataloomIndexImport } from './routes/_app/dataloom/index'
 import { Route as AppThemeThemeIdImport } from './routes/_app/theme/$themeId'
+import { Route as AppDataloomStatsImport } from './routes/_app/dataloom/stats'
+import { Route as AppDataloomSearchImport } from './routes/_app/dataloom/search'
+import { Route as AppDataloomJobsImport } from './routes/_app/dataloom/jobs'
 import { Route as AppAnalysisAnalysisIdImport } from './routes/_app/analysis/$analysisId'
 
 // Create/Update Routes
@@ -44,16 +49,46 @@ const AppRequestRoute = AppRequestImport.update({
   getParentRoute: () => AppRoute,
 } as any)
 
+const AppDataloomRouteRoute = AppDataloomRouteImport.update({
+  id: '/dataloom',
+  path: '/dataloom',
+  getParentRoute: () => AppRoute,
+} as any)
+
 const AppThemeIndexRoute = AppThemeIndexImport.update({
   id: '/theme/',
   path: '/theme/',
   getParentRoute: () => AppRoute,
 } as any)
 
+const AppDataloomIndexRoute = AppDataloomIndexImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppDataloomRouteRoute,
+} as any)
+
 const AppThemeThemeIdRoute = AppThemeThemeIdImport.update({
   id: '/theme/$themeId',
   path: '/theme/$themeId',
   getParentRoute: () => AppRoute,
+} as any)
+
+const AppDataloomStatsRoute = AppDataloomStatsImport.update({
+  id: '/stats',
+  path: '/stats',
+  getParentRoute: () => AppDataloomRouteRoute,
+} as any)
+
+const AppDataloomSearchRoute = AppDataloomSearchImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => AppDataloomRouteRoute,
+} as any)
+
+const AppDataloomJobsRoute = AppDataloomJobsImport.update({
+  id: '/jobs',
+  path: '/jobs',
+  getParentRoute: () => AppDataloomRouteRoute,
 } as any)
 
 const AppAnalysisAnalysisIdRoute = AppAnalysisAnalysisIdImport.update({
@@ -80,6 +115,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginImport
       parentRoute: typeof rootRoute
     }
+    '/_app/dataloom': {
+      id: '/_app/dataloom'
+      path: '/dataloom'
+      fullPath: '/dataloom'
+      preLoaderRoute: typeof AppDataloomRouteImport
+      parentRoute: typeof AppImport
+    }
     '/_app/request': {
       id: '/_app/request'
       path: '/request'
@@ -101,12 +143,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAnalysisAnalysisIdImport
       parentRoute: typeof AppImport
     }
+    '/_app/dataloom/jobs': {
+      id: '/_app/dataloom/jobs'
+      path: '/jobs'
+      fullPath: '/dataloom/jobs'
+      preLoaderRoute: typeof AppDataloomJobsImport
+      parentRoute: typeof AppDataloomRouteImport
+    }
+    '/_app/dataloom/search': {
+      id: '/_app/dataloom/search'
+      path: '/search'
+      fullPath: '/dataloom/search'
+      preLoaderRoute: typeof AppDataloomSearchImport
+      parentRoute: typeof AppDataloomRouteImport
+    }
+    '/_app/dataloom/stats': {
+      id: '/_app/dataloom/stats'
+      path: '/stats'
+      fullPath: '/dataloom/stats'
+      preLoaderRoute: typeof AppDataloomStatsImport
+      parentRoute: typeof AppDataloomRouteImport
+    }
     '/_app/theme/$themeId': {
       id: '/_app/theme/$themeId'
       path: '/theme/$themeId'
       fullPath: '/theme/$themeId'
       preLoaderRoute: typeof AppThemeThemeIdImport
       parentRoute: typeof AppImport
+    }
+    '/_app/dataloom/': {
+      id: '/_app/dataloom/'
+      path: '/'
+      fullPath: '/dataloom/'
+      preLoaderRoute: typeof AppDataloomIndexImport
+      parentRoute: typeof AppDataloomRouteImport
     }
     '/_app/theme/': {
       id: '/_app/theme/'
@@ -120,7 +190,25 @@ declare module '@tanstack/react-router' {
 
 // Create and export the route tree
 
+interface AppDataloomRouteRouteChildren {
+  AppDataloomJobsRoute: typeof AppDataloomJobsRoute
+  AppDataloomSearchRoute: typeof AppDataloomSearchRoute
+  AppDataloomStatsRoute: typeof AppDataloomStatsRoute
+  AppDataloomIndexRoute: typeof AppDataloomIndexRoute
+}
+
+const AppDataloomRouteRouteChildren: AppDataloomRouteRouteChildren = {
+  AppDataloomJobsRoute: AppDataloomJobsRoute,
+  AppDataloomSearchRoute: AppDataloomSearchRoute,
+  AppDataloomStatsRoute: AppDataloomStatsRoute,
+  AppDataloomIndexRoute: AppDataloomIndexRoute,
+}
+
+const AppDataloomRouteRouteWithChildren =
+  AppDataloomRouteRoute._addFileChildren(AppDataloomRouteRouteChildren)
+
 interface AppRouteChildren {
+  AppDataloomRouteRoute: typeof AppDataloomRouteRouteWithChildren
   AppRequestRoute: typeof AppRequestRoute
   AppIndexRoute: typeof AppIndexRoute
   AppAnalysisAnalysisIdRoute: typeof AppAnalysisAnalysisIdRoute
@@ -129,6 +217,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppDataloomRouteRoute: AppDataloomRouteRouteWithChildren,
   AppRequestRoute: AppRequestRoute,
   AppIndexRoute: AppIndexRoute,
   AppAnalysisAnalysisIdRoute: AppAnalysisAnalysisIdRoute,
@@ -141,10 +230,15 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 export interface FileRoutesByFullPath {
   '': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
+  '/dataloom': typeof AppDataloomRouteRouteWithChildren
   '/request': typeof AppRequestRoute
   '/': typeof AppIndexRoute
   '/analysis/$analysisId': typeof AppAnalysisAnalysisIdRoute
+  '/dataloom/jobs': typeof AppDataloomJobsRoute
+  '/dataloom/search': typeof AppDataloomSearchRoute
+  '/dataloom/stats': typeof AppDataloomStatsRoute
   '/theme/$themeId': typeof AppThemeThemeIdRoute
+  '/dataloom/': typeof AppDataloomIndexRoute
   '/theme': typeof AppThemeIndexRoute
 }
 
@@ -153,7 +247,11 @@ export interface FileRoutesByTo {
   '/request': typeof AppRequestRoute
   '/': typeof AppIndexRoute
   '/analysis/$analysisId': typeof AppAnalysisAnalysisIdRoute
+  '/dataloom/jobs': typeof AppDataloomJobsRoute
+  '/dataloom/search': typeof AppDataloomSearchRoute
+  '/dataloom/stats': typeof AppDataloomStatsRoute
   '/theme/$themeId': typeof AppThemeThemeIdRoute
+  '/dataloom': typeof AppDataloomIndexRoute
   '/theme': typeof AppThemeIndexRoute
 }
 
@@ -161,10 +259,15 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
+  '/_app/dataloom': typeof AppDataloomRouteRouteWithChildren
   '/_app/request': typeof AppRequestRoute
   '/_app/': typeof AppIndexRoute
   '/_app/analysis/$analysisId': typeof AppAnalysisAnalysisIdRoute
+  '/_app/dataloom/jobs': typeof AppDataloomJobsRoute
+  '/_app/dataloom/search': typeof AppDataloomSearchRoute
+  '/_app/dataloom/stats': typeof AppDataloomStatsRoute
   '/_app/theme/$themeId': typeof AppThemeThemeIdRoute
+  '/_app/dataloom/': typeof AppDataloomIndexRoute
   '/_app/theme/': typeof AppThemeIndexRoute
 }
 
@@ -173,10 +276,15 @@ export interface FileRouteTypes {
   fullPaths:
     | ''
     | '/login'
+    | '/dataloom'
     | '/request'
     | '/'
     | '/analysis/$analysisId'
+    | '/dataloom/jobs'
+    | '/dataloom/search'
+    | '/dataloom/stats'
     | '/theme/$themeId'
+    | '/dataloom/'
     | '/theme'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -184,16 +292,25 @@ export interface FileRouteTypes {
     | '/request'
     | '/'
     | '/analysis/$analysisId'
+    | '/dataloom/jobs'
+    | '/dataloom/search'
+    | '/dataloom/stats'
     | '/theme/$themeId'
+    | '/dataloom'
     | '/theme'
   id:
     | '__root__'
     | '/_app'
     | '/login'
+    | '/_app/dataloom'
     | '/_app/request'
     | '/_app/'
     | '/_app/analysis/$analysisId'
+    | '/_app/dataloom/jobs'
+    | '/_app/dataloom/search'
+    | '/_app/dataloom/stats'
     | '/_app/theme/$themeId'
+    | '/_app/dataloom/'
     | '/_app/theme/'
   fileRoutesById: FileRoutesById
 }
@@ -225,6 +342,7 @@ export const routeTree = rootRoute
     "/_app": {
       "filePath": "_app.tsx",
       "children": [
+        "/_app/dataloom",
         "/_app/request",
         "/_app/",
         "/_app/analysis/$analysisId",
@@ -234,6 +352,16 @@ export const routeTree = rootRoute
     },
     "/login": {
       "filePath": "login.tsx"
+    },
+    "/_app/dataloom": {
+      "filePath": "_app/dataloom/route.tsx",
+      "parent": "/_app",
+      "children": [
+        "/_app/dataloom/jobs",
+        "/_app/dataloom/search",
+        "/_app/dataloom/stats",
+        "/_app/dataloom/"
+      ]
     },
     "/_app/request": {
       "filePath": "_app/request.tsx",
@@ -247,9 +375,25 @@ export const routeTree = rootRoute
       "filePath": "_app/analysis/$analysisId.tsx",
       "parent": "/_app"
     },
+    "/_app/dataloom/jobs": {
+      "filePath": "_app/dataloom/jobs.tsx",
+      "parent": "/_app/dataloom"
+    },
+    "/_app/dataloom/search": {
+      "filePath": "_app/dataloom/search.tsx",
+      "parent": "/_app/dataloom"
+    },
+    "/_app/dataloom/stats": {
+      "filePath": "_app/dataloom/stats.tsx",
+      "parent": "/_app/dataloom"
+    },
     "/_app/theme/$themeId": {
       "filePath": "_app/theme/$themeId.tsx",
       "parent": "/_app"
+    },
+    "/_app/dataloom/": {
+      "filePath": "_app/dataloom/index.tsx",
+      "parent": "/_app/dataloom"
     },
     "/_app/theme/": {
       "filePath": "_app/theme/index.tsx",

@@ -1,5 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
+import { useTheme } from "next-themes";
+import { ToasterProps } from "sonner";
 import { AuthProvider, useAuth } from "./components/auth/auth";
 import { Toaster } from "./components/ui/sonner";
 import { mockAnalysisApi } from "./domain/analysis/api.dev";
@@ -7,6 +9,7 @@ import { mockAuthApi } from "./domain/auth/api.dev";
 import { axiosInstance } from "./domain/http/api";
 import { mockParserApi } from "./domain/parser/api.dev";
 import { mockThemesApi } from "./domain/theme/api.dev";
+import { useMediaQuery } from "./lib/hooks/useMediaQuery.hook";
 import { routeTree } from "./routeTree.gen";
 
 export const router = createRouter({
@@ -43,11 +46,24 @@ if (import.meta.env.MODE === "development") {
 }
 
 function App() {
+    const { resolvedTheme } = useTheme();
+
+    const isDesktop = useMediaQuery("(min-width: 767px)");
+
     return (
         <QueryClientProvider client={queryClient}>
             <AuthProvider>
                 <InnerApp />
-                <Toaster position='top-right' />
+                <Toaster
+                    visibleToasts={6}
+                    expand
+                    theme={resolvedTheme as ToasterProps["theme"]}
+                    position={isDesktop ? "top-right" : "bottom-center"}
+                    offset={{
+                        top: "80px",
+                        right: "24px",
+                    }}
+                />
             </AuthProvider>
         </QueryClientProvider>
     );
