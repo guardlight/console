@@ -1,177 +1,41 @@
 import { Card } from "@/components/ui/card";
+import DataLoaderSpinner from "@/components/ui/custom/DataLoader";
+import EmptyList from "@/components/ui/custom/EmptyList";
+import ErrorSoftner from "@/components/ui/custom/ErrorSoftner";
+import { UrnKeyValueList } from "@/domain/dataloom/commons/type";
+import { DataloomStatisticsKeys } from "@/domain/dataloom/stats/api";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 export function DataloomStatsScreen() {
-    return (
-        <div>
-            <SimpleGroupedView />
-        </div>
+    const { data, isLoading, error } = useQuery(
+        DataloomStatisticsKeys.statistics()
     );
+
+    if (isLoading)
+        return <DataLoaderSpinner title='Loading dataloom statistics.' />;
+
+    if (error)
+        return (
+            <ErrorSoftner
+                title="Couldn't load dataloom statistics."
+                queryKeys={DataloomStatisticsKeys.statistics().queryKey}
+            />
+        );
+
+    if (!data)
+        return (
+            <EmptyList title='No dataloom statistics.'>
+                <p></p>
+            </EmptyList>
+        );
+
+    return <DataloomStats data={data} />;
 }
-
-type ResultItem = {
-    urn: string;
-    value: string;
-};
-
-const data: ResultItem[] = [
-    { urn: "urn:dataloom:books:statistic:processed:fantasy", value: "2575" },
-    {
-        urn: "urn:dataloom:books:statistic:processed:classiccrimemystery",
-        value: "1158",
-    },
-    {
-        urn: "urn:dataloom:books:statistic:processed:cozymystery",
-        value: "1420",
-    },
-    { urn: "urn:dataloom:books:statistic:processed:romans", value: "3427" },
-    { urn: "urn:dataloom:books:statistic:processed:thriller", value: "742" },
-    { urn: "urn:dataloom:books:statistic:processed:literatuur", value: "1790" },
-    {
-        urn: "urn:dataloom:books:statistic:processed:sciencefiction",
-        value: "1970",
-    },
-    { urn: "urn:dataloom:books:statistic:processed:truecrime", value: "17" },
-    {
-        urn: "urn:dataloom:books:statistic:processed:psychthriller",
-        value: "68",
-    },
-    { urn: "urn:dataloom:books:statistic:processed:youngadult", value: "18" },
-    {
-        urn: "urn:dataloom:books:statistic:processed:historycrimemystery",
-        value: "1266",
-    },
-    { urn: "urn:dataloom:books:statistic:processed:mystery", value: "1729" },
-    { urn: "urn:dataloom:books:statistic:processed:total", value: "16180" },
-    {
-        urn: "urn:dataloom:books:statistic:downloaded:annasarchive:fantasy",
-        value: "16",
-    },
-    {
-        urn: "urn:dataloom:books:statistic:downloaded:annasarchive:total",
-        value: "16",
-    },
-    {
-        urn: "urn:dataloom:books:statistic:collected:annasarchive:fantasy",
-        value: "3463",
-    },
-    {
-        urn: "urn:dataloom:books:statistic:collected:annasarchive:classiccrimemystery",
-        value: "108",
-    },
-    {
-        urn: "urn:dataloom:books:statistic:collected:annasarchive:cozymystery",
-        value: "770",
-    },
-    {
-        urn: "urn:dataloom:books:statistic:collected:annasarchive:romans",
-        value: "1428",
-    },
-    {
-        urn: "urn:dataloom:books:statistic:collected:annasarchive:thriller",
-        value: "136",
-    },
-    {
-        urn: "urn:dataloom:books:statistic:collected:annasarchive:sciencefiction",
-        value: "1319",
-    },
-    {
-        urn: "urn:dataloom:books:statistic:collected:annasarchive:literatuur",
-        value: "4242",
-    },
-    {
-        urn: "urn:dataloom:books:statistic:collected:annasarchive:psychthriller",
-        value: "1",
-    },
-    {
-        urn: "urn:dataloom:books:statistic:collected:annasarchive:historycrimemystery",
-        value: "548",
-    },
-    {
-        urn: "urn:dataloom:books:statistic:collected:annasarchive:mystery",
-        value: "4980",
-    },
-    {
-        urn: "urn:dataloom:books:statistic:collected:annasarchive:total",
-        value: "16995",
-    },
-    {
-        urn: "urn:dataloom:books:statistic:collected:annasarchive:fantasy",
-        value: "3463",
-    },
-    {
-        urn: "urn:dataloom:books:statistic:collected:annasarchive:classiccrimemystery",
-        value: "108",
-    },
-    {
-        urn: "urn:dataloom:books:statistic:collected:annasarchive:cozymystery",
-        value: "770",
-    },
-    {
-        urn: "urn:dataloom:books:statistic:collected:annasarchive:romans",
-        value: "1428",
-    },
-    {
-        urn: "urn:dataloom:books:statistic:collected:annasarchive:thriller",
-        value: "136",
-    },
-    {
-        urn: "urn:dataloom:books:statistic:collected:annasarchive:sciencefiction",
-        value: "1319",
-    },
-    {
-        urn: "urn:dataloom:books:statistic:collected:annasarchive:literatuur",
-        value: "4242",
-    },
-    {
-        urn: "urn:dataloom:books:statistic:collected:annasarchive:psychthriller",
-        value: "1",
-    },
-    {
-        urn: "urn:dataloom:books:statistic:collected:annasarchive:historycrimemystery",
-        value: "548",
-    },
-    {
-        urn: "urn:dataloom:books:statistic:collected:annasarchive:mystery",
-        value: "4980",
-    },
-    {
-        urn: "urn:dataloom:books:statistic:collected:annasarchive:total",
-        value: "16995",
-    },
-];
-
-type GroupedByNextId = {
-    [nextId: string]: { ids: string; value: string; urn: string }[];
-};
-
-type GroupedByResource = {
-    [resource: string]: GroupedByNextId;
-};
-
-function groupByResourceAndNextId(results: ResultItem[]): GroupedByResource {
-    return results.reduce<GroupedByResource>((acc, { urn, value }) => {
-        const parts = urn.split(":");
-        const resource = parts[2] || "-";
-        const statisticPrefix = parts[3];
-        const nextId = parts[4] || "-";
-        const restIds = parts.slice(5).join(":") || "-";
-
-        if (statisticPrefix !== "statistic") return acc;
-
-        if (!acc[resource]) acc[resource] = {};
-        if (!acc[resource][nextId]) acc[resource][nextId] = [];
-
-        acc[resource][nextId].push({ ids: restIds, value, urn });
-
-        return acc;
-    }, {});
-}
-
-export default function SimpleGroupedView() {
-    const grouped = groupByResourceAndNextId(data);
+function DataloomStats({ data }: { data: UrnKeyValueList }) {
+    const grouped = useCallback(() => groupByResourceAndNextId(data), [data]);
 
     const [expandedResources, setExpandedResources] = useState<
         Record<string, boolean>
@@ -199,7 +63,7 @@ export default function SimpleGroupedView() {
 
     return (
         <div className=''>
-            {Object.entries(grouped).map(([resource, nextIdGroups], idx) => {
+            {Object.entries(grouped()).map(([resource, nextIdGroups], idx) => {
                 const isResourceExpanded = expandedResources[resource] ?? true; // default expanded
 
                 return (
@@ -293,6 +157,33 @@ export default function SimpleGroupedView() {
             })}
         </div>
     );
+}
+
+type GroupedByNextId = {
+    [nextId: string]: { ids: string; value: string; urn: string }[];
+};
+
+type GroupedByResource = {
+    [resource: string]: GroupedByNextId;
+};
+
+function groupByResourceAndNextId(results: UrnKeyValueList): GroupedByResource {
+    return results.reduce<GroupedByResource>((acc, { urn, value }) => {
+        const parts = urn.split(":");
+        const resource = parts[2] || "-";
+        const statisticPrefix = parts[3];
+        const nextId = parts[4] || "-";
+        const restIds = parts.slice(5).join(":") || "-";
+
+        if (statisticPrefix !== "statistic") return acc;
+
+        if (!acc[resource]) acc[resource] = {};
+        if (!acc[resource][nextId]) acc[resource][nextId] = [];
+
+        acc[resource][nextId].push({ ids: restIds, value, urn });
+
+        return acc;
+    }, {});
 }
 
 interface StatProps {

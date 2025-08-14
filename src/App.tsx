@@ -7,6 +7,8 @@ import { Toaster } from "./components/ui/sonner";
 import { mockAnalysisApi } from "./domain/analysis/api.dev";
 import { mockAuthApi } from "./domain/auth/api.dev";
 import { mockDataloomJobsApi } from "./domain/dataloom/jobs/api.dev";
+import { mockDataloomSearchApi } from "./domain/dataloom/search/api.dev";
+import { mockDataloomStatisticsApi } from "./domain/dataloom/stats/api.dev";
 import { axiosDataloomInstance, axiosInstance } from "./domain/http/api";
 import { mockParserApi } from "./domain/parser/api.dev";
 import { mockThemesApi } from "./domain/theme/api.dev";
@@ -47,6 +49,8 @@ if (import.meta.env.MODE === "development") {
 
     const mockDataloom = new MockAdapter(axiosDataloomInstance);
     mockDataloomJobsApi(mockDataloom);
+    mockDataloomStatisticsApi(mockDataloom);
+    mockDataloomSearchApi(mockDataloom);
 }
 
 function App() {
