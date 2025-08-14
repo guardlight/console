@@ -6,7 +6,8 @@ import { AuthProvider, useAuth } from "./components/auth/auth";
 import { Toaster } from "./components/ui/sonner";
 import { mockAnalysisApi } from "./domain/analysis/api.dev";
 import { mockAuthApi } from "./domain/auth/api.dev";
-import { axiosInstance } from "./domain/http/api";
+import { mockDataloomJobsApi } from "./domain/dataloom/jobs/api.dev";
+import { axiosDataloomInstance, axiosInstance } from "./domain/http/api";
 import { mockParserApi } from "./domain/parser/api.dev";
 import { mockThemesApi } from "./domain/theme/api.dev";
 import { useMediaQuery } from "./lib/hooks/useMediaQuery.hook";
@@ -43,6 +44,9 @@ if (import.meta.env.MODE === "development") {
     mockParserApi(mock);
     mockAnalysisApi(mock);
     mockAuthApi(mock);
+
+    const mockDataloom = new MockAdapter(axiosDataloomInstance);
+    mockDataloomJobsApi(mockDataloom);
 }
 
 function App() {

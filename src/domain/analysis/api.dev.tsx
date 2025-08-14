@@ -1,5 +1,5 @@
 import MockAdapter from "axios-mock-adapter";
-import { GuardlightServerError } from "../http/api";
+import { GuardlightServerError, mockGetRoute } from "../http/api";
 import { AnalysisRequestResult, AnalysisRequestResultPaginated } from "./type";
 
 export const mockAnalysisApi = (mock: MockAdapter) => {
@@ -41,7 +41,7 @@ export const mockAnalysisApi = (mock: MockAdapter) => {
             }, 1000);
         });
     });
-    mock.onGet(route("/analysis/:id")).reply(async (_) => {
+    mock.onGet(mockGetRoute("/analysis/:id")).reply(async (_) => {
         return new Promise((resolve, _) => {
             setTimeout(function () {
                 const random = Math.random();
@@ -91,12 +91,6 @@ export const mockAnalysisApi = (mock: MockAdapter) => {
         });
     });
 };
-
-function route(path = "") {
-    return typeof path === "string"
-        ? new RegExp(path.replace(/:\w+/g, "[^/]+"))
-        : path;
-}
 
 export const ANALYSES: Array<AnalysisRequestResult> = [
     {

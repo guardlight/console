@@ -6,6 +6,11 @@ export const axiosInstance = axios.create({
     withCredentials: true,
 });
 
+export const axiosDataloomInstance = axios.create({
+    baseURL: `${import.meta.env.VITE_DATALOOM_URL}/api`,
+    withCredentials: true,
+});
+
 export const handleResponse = <T extends unknown>(
     response: AxiosResponse<T>
 ): Promise<T> => {
@@ -44,3 +49,10 @@ export type GuardlightServerError = {
     code: number;
     message: string;
 };
+
+// Dev
+export function mockGetRoute(path = "") {
+    return typeof path === "string"
+        ? new RegExp(path.replace(/:\w+/g, "[^/]+"))
+        : path;
+}
