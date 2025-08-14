@@ -37,7 +37,7 @@ export const DataloomJobsKeys = {
             // refetchOnWindowFocus: false,
             retry: 0,
             // refetchOnMount: false,
-            // staleTime: 5_000,
+            staleTime: 1_000,
             refetchInterval: 5_000,
         }),
 };

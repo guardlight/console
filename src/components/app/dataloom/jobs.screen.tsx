@@ -13,7 +13,7 @@ import {
 import { DataloomJobsApi, DataloomJobsKeys } from "@/domain/dataloom/jobs/api";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ChevronDown, LoaderCircle } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 export function DataloomJobsScreen() {
@@ -88,23 +88,28 @@ type Props = {
 
 export default function SchedulerJobsPage({ jobs }: Props) {
     // Group jobs by jobType (part after scheduler)
-    const grouped = jobs.reduce(
-        (acc, job) => {
-            const { jobType, category, status, nextRun, urn } = parseJob(job);
+    const grouped = useMemo(
+        () =>
+            jobs.reduce(
+                (acc, job) => {
+                    const { jobType, category, status, nextRun, urn } =
+                        parseJob(job);
 
-            if (!acc[jobType]) acc[jobType] = [];
-            acc[jobType].push({ category, status, nextRun, urn });
-            return acc;
-        },
-        {} as Record<
-            string,
-            {
-                category: string;
-                status: JobStatus;
-                nextRun: string;
-                urn: string;
-            }[]
-        >
+                    if (!acc[jobType]) acc[jobType] = [];
+                    acc[jobType].push({ category, status, nextRun, urn });
+                    return acc;
+                },
+                {} as Record<
+                    string,
+                    {
+                        category: string;
+                        status: JobStatus;
+                        nextRun: string;
+                        urn: string;
+                    }[]
+                >
+            ),
+        [jobs]
     );
 
     const [expandedJobTypes, setExpandedJobTypes] = useState<
@@ -136,8 +141,11 @@ export default function SchedulerJobsPage({ jobs }: Props) {
 
                         {expanded && (
                             <div className='px-6 mb-4 space-y-2 '>
-                                {jobs.map((job, idx) => (
-                                    <JobItem key={idx} {...job} />
+                                {jobs.map((job) => (
+                                    <JobItem
+                                        key={`${job.urn}-${job.status}`}
+                                        {...job}
+                                    />
                                 ))}
                             </div>
                         )}
@@ -274,7 +282,9 @@ function JobItem({ category, status: statusOriginal, nextRun, urn }: IJobItem) {
                         variant='destructive'
                         size='sm'
                         className='w-full md:w-auto'
-                        disabled={isStopping}
+                        disabled={
+                            status === "running" || isExecuting || isStopping
+                        }
                     >
                         Stop
                         {isStopping && (
