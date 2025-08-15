@@ -4,6 +4,7 @@ import { EVENT_AUTHENTICATION_LOGOUT } from "@/components/const/const";
 import { Button } from "@/components/ui/button";
 import useInvalidateQuery from "@/components/ui/custom/Invalidate.hook";
 import { AnalysisKeys } from "@/domain/analysis/api";
+import { DATALOOM_URL } from "@/domain/http/api";
 import { ParserKeys } from "@/domain/parser/api";
 import { ThemeKeys } from "@/domain/theme/api";
 import { usePrefetchQuery } from "@tanstack/react-query";
@@ -139,7 +140,7 @@ function Menu() {
     return (
         <div>
             {location.pathname === "/" &&
-                import.meta.env.VITE_DATALOOM_URL !== "GL_DATALOOM_URL" && (
+                DATALOOM_URL !== "GL_DATALOOM_URL" && (
                     <Link to={"/dataloom"}>
                         <Button variant='link' className='px-4'>
                             <span className='flex flex-row gap-3'>

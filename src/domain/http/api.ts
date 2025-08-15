@@ -11,6 +11,8 @@ export const axiosDataloomInstance = axios.create({
     withCredentials: true,
 });
 
+export const DATALOOM_URL = import.meta.env.VITE_DATALOOM_URL;
+
 export const handleResponse = <T extends unknown>(
     response: AxiosResponse<T>
 ): Promise<T> => {
