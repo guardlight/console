@@ -177,6 +177,8 @@ export const GENRE_MAP: Record<string, Array<string>> = {
         "Graphic Novel",
         "Poetry",
         "Adventure",
+        "Children",
+        "Teenager",
     ],
     movie: [
         "Action",
